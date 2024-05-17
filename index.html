@@ -164,7 +164,9 @@
             const user = users.find(user => user.username === username && user.password === password);
 
             if (user) {
+                const loginTime = new Date().getTime();
                 localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('loginTime', loginTime);
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
                 loadSalesData();
@@ -334,13 +336,21 @@
         }
 
         function checkLoginStatus() {
-            if (localStorage.getItem('isLoggedIn') === 'true') {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const loginTime = localStorage.getItem('loginTime');
+            const currentTime = new Date().getTime();
+            const sessionDuration = 5 * 60 * 1000; // 5 minutos em milissegundos
+
+            if (isLoggedIn === 'true' && (currentTime - loginTime) < sessionDuration) {
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
                 loadSalesData();
                 renderTable();
                 renderChart();
                 updateSummary();
+            } else {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('loginTime');
             }
         }
 
