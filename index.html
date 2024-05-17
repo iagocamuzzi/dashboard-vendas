@@ -260,7 +260,7 @@
                 const sales = salesData[lastUpdatedDay - 1].sales;
                 const status = sales >= target ? 'Meta Atingida 🎉' : 'Meta Não Atingida ❌';
                 const message = `📅 Dia: ${lastUpdatedDay}\n🎯 Meta: R$ ${target.toFixed(2)}\n💰 Vendas Realizadas: R$ ${sales.toFixed(2)}\n📊 Status: ${status}`;
-                const phoneNumber = '5527981829452';  // Número de telefone do destinatário no formato internacional
+                const phoneNumber = '5527997635942';  // Número de telefone do destinatário no formato internacional
                 const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
 
                 window.open(whatsappUrl, '_blank');
