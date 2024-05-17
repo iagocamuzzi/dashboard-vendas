@@ -164,6 +164,7 @@
             const user = users.find(user => user.username === username && user.password === password);
 
             if (user) {
+                localStorage.setItem('isLoggedIn', 'true');
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
                 loadSalesData();
@@ -331,6 +332,19 @@
             document.getElementById('totalSales').innerText = `R$ ${totalSales.toFixed(2)}`;
             document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
         }
+
+        function checkLoginStatus() {
+            if (localStorage.getItem('isLoggedIn') === 'true') {
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('dashboard-container').style.display = 'block';
+                loadSalesData();
+                renderTable();
+                renderChart();
+                updateSummary();
+            }
+        }
+
+        window.onload = checkLoginStatus;
 
         // Initial render
         loadSalesData();
