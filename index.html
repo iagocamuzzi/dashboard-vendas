@@ -76,6 +76,9 @@
             -moz-appearance: textfield;
         }
     </style>
+    <!-- Adicione o SDK do Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js"></script>
 </head>
 <body>
     <div class="login-container" id="login-container">
@@ -148,8 +151,21 @@
         <button class="btn btn-danger" onclick="logout()">Logout</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCZ0BZG_Scu_2m-lVPaHpPp6K01SaFLQLA",
+            authDomain: "dashboardcs-509e2.firebaseapp.com",
+            projectId: "dashboardcs-509e2",
+            storageBucket: "dashboardcs-509e2.appspot.com",
+            messagingSenderId: "1026285016355",
+            appId: "1:1026285016355:web:7ee8bac8de533ec90ee896"
+        };
+
+        // Inicializar o Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         const users = [
             { username: 'iago', password: '123456' },
             { username: 'larissa', password: '123456' },
@@ -174,8 +190,18 @@
                 renderTable();
                 renderChart();
                 updateSummary();
-                // Adiciona listener para o storage event
-                window.addEventListener('storage', syncSalesData);
+                // Adiciona listener para o Firebase
+                database.ref('salesData').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        salesData.forEach((item, index) => {
+                            item.sales = data[index].sales;
+                        });
+                        renderTable();
+                        renderChart();
+                        updateSummary();
+                    }
+                });
             } else {
                 document.getElementById('login-error').style.display = 'block';
             }
@@ -229,21 +255,25 @@
             saveSalesData();
         }
 
-        // Load sales data from localStorage
+        // Load sales data from Firebase
         function loadSalesData() {
-            const savedData = localStorage.getItem('salesData');
-            if (savedData) {
-                const parsedData = JSON.parse(savedData);
-                parsedData.forEach((data, index) => {
-                    salesData[index].sales = data.sales;
-                });
-            } else {
-                resetSalesData();
-            }
+            database.ref('salesData').get().then((snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    salesData.forEach((item, index) => {
+                        item.sales = data[index].sales;
+                    });
+                } else {
+                    resetSalesData();
+                }
+                renderTable();
+                renderChart();
+                updateSummary();
+            });
         }
 
         function saveSalesData() {
-            localStorage.setItem('salesData', JSON.stringify(salesData));
+            database.ref('salesData').set(salesData);
         }
 
         function updateSales() {
@@ -260,8 +290,6 @@
                 // Limpar os campos de entrada
                 document.getElementById('day').value = '';
                 document.getElementById('sales').value = '';
-                // Trigger storage event
-                localStorage.setItem('updateTrigger', new Date().toISOString());
             } else {
                 alert('Por favor, insira um dia válido e um valor de vendas.');
             }
@@ -348,15 +376,6 @@
             document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
         }
 
-        function syncSalesData(event) {
-            if (event.key === 'salesData') {
-                loadSalesData();
-                renderTable();
-                renderChart();
-                updateSummary();
-            }
-        }
-
         function checkLoginStatus() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             const loginTime = localStorage.getItem('loginTime');
@@ -370,7 +389,18 @@
                 renderTable();
                 renderChart();
                 updateSummary();
-                window.addEventListener('storage', syncSalesData);
+                // Adiciona listener para o Firebase
+                database.ref('salesData').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        salesData.forEach((item, index) => {
+                            item.sales = data[index].sales;
+                        });
+                        renderTable();
+                        renderChart();
+                        updateSummary();
+                    }
+                });
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
