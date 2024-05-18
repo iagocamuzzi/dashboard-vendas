@@ -124,6 +124,7 @@
                 </div>
                 <button class="btn btn-primary" onclick="updateSales()">Atualizar</button>
                 <button class="btn btn-success ml-2" onclick="sendWhatsAppMessage()">Enviar WhatsApp</button>
+                <button class="btn btn-warning ml-2" onclick="resetSales()">Zerar Vendas</button>
             </div>
         </div>
         <div class="table-container">
@@ -227,6 +228,17 @@
         function resetSalesData() {
             salesData.forEach(data => data.sales = 0);
             saveSalesData();
+            localStorage.setItem('updateTrigger', new Date().toISOString());
+        }
+
+        // Função para zerar vendas
+        function resetSales() {
+            if (confirm("Você tem certeza que deseja zerar as vendas realizadas?")) {
+                resetSalesData();
+                renderTable();
+                renderChart();
+                updateSummary();
+            }
         }
 
         // Load sales data from localStorage
