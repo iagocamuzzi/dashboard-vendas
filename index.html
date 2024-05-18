@@ -223,7 +223,6 @@
 
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-        // Zerar dados de vendas realizadas
         function resetSalesData() {
             salesData.forEach(data => data.sales = 0);
             saveSalesData();
@@ -235,11 +234,11 @@
             const savedData = localStorage.getItem('salesData');
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
-                parsedData.forEach((data, index) => {
-                    salesData[index].sales = data.sales;
+                salesData.forEach((data, index) => {
+                    if (parsedData[index]) {
+                        data.sales = parsedData[index].sales;
+                    }
                 });
-            } else {
-                resetSalesData();
             }
         }
 
