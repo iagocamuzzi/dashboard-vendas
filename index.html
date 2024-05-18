@@ -124,7 +124,6 @@
                 </div>
                 <button class="btn btn-primary" onclick="updateSales()">Atualizar</button>
                 <button class="btn btn-success ml-2" onclick="sendWhatsAppMessage()">Enviar WhatsApp</button>
-                <button class="btn btn-warning ml-2" onclick="resetSales()">Zerar Vendas</button>
             </div>
         </div>
         <div class="table-container">
@@ -190,21 +189,21 @@
 
         const salesData = [
             { target: 0.00, sales: 0 },
-            { target: 1356, sales: 0 },
-            { target: 1519, sales: 0 },
-            { target: 3171, sales: 0 },
+            { target: 1356, sales: 2067 },
+            { target: 1519, sales: 814 },
+            { target: 3171, sales: 2411 },
             { target: 0.00, sales: 0 },
-            { target: 836, sales: 0 },
-            { target: 1728, sales: 0 },
-            { target: 2297, sales: 0 },
-            { target: 2851, sales: 0 },
-            { target: 5872, sales: 0 },
-            { target: 17798, sales: 0 },
-            { target: 0.00, sales: 0 },
-            { target: 1693, sales: 0 },
-            { target: 1408, sales: 0 },
-            { target: 682, sales: 0 },
-            { target: 892, sales: 0 },
+            { target: 836, sales: 889 },
+            { target: 1728, sales: 1288 },
+            { target: 2297, sales: 1778 },
+            { target: 2851, sales: 3809 },
+            { target: 5872, sales: 3676 },
+            { target: 17798, sales: 18364 },
+            { target: 0.00, sales: 10202 },
+            { target: 1693, sales: 1268 },
+            { target: 1408, sales: 1254 },
+            { target: 682, sales: 1556 },
+            { target: 892, sales: 775 },
             { target: 1064, sales: 0 },
             { target: 1474, sales: 0 },
             { target: 0.00, sales: 0 },
@@ -229,16 +228,6 @@
             salesData.forEach(data => data.sales = 0);
             saveSalesData();
             localStorage.setItem('updateTrigger', new Date().toISOString());
-        }
-
-        // Função para zerar vendas
-        function resetSales() {
-            if (confirm("Você tem certeza que deseja zerar as vendas realizadas?")) {
-                resetSalesData();
-                renderTable();
-                renderChart();
-                updateSummary();
-            }
         }
 
         // Load sales data from localStorage
