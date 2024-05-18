@@ -174,6 +174,8 @@
                 renderTable();
                 renderChart();
                 updateSummary();
+                // Adiciona listener para o storage event
+                window.addEventListener('storage', syncSalesData);
             } else {
                 document.getElementById('login-error').style.display = 'block';
             }
@@ -250,6 +252,8 @@
                 // Limpar os campos de entrada
                 document.getElementById('day').value = '';
                 document.getElementById('sales').value = '';
+                // Trigger storage event
+                localStorage.setItem('updateTrigger', new Date().toISOString());
             } else {
                 alert('Por favor, insira um dia válido e um valor de vendas.');
             }
@@ -336,6 +340,15 @@
             document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
         }
 
+        function syncSalesData(event) {
+            if (event.key === 'salesData') {
+                loadSalesData();
+                renderTable();
+                renderChart();
+                updateSummary();
+            }
+        }
+
         function checkLoginStatus() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             const loginTime = localStorage.getItem('loginTime');
@@ -349,6 +362,7 @@
                 renderTable();
                 renderChart();
                 updateSummary();
+                window.addEventListener('storage', syncSalesData);
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
