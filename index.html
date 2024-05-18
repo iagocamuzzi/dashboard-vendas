@@ -223,6 +223,12 @@
 
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
+        // Zerar dados de vendas realizadas
+        function resetSalesData() {
+            salesData.forEach(data => data.sales = 0);
+            saveSalesData();
+        }
+
         // Load sales data from localStorage
         function loadSalesData() {
             const savedData = localStorage.getItem('salesData');
@@ -231,6 +237,8 @@
                 parsedData.forEach((data, index) => {
                     salesData[index].sales = data.sales;
                 });
+            } else {
+                resetSalesData();
             }
         }
 
