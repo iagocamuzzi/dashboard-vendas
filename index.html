@@ -235,10 +235,10 @@
             if (savedData) {
                 const parsedData = JSON.parse(savedData);
                 salesData.forEach((data, index) => {
-                    if (parsedData[index]) {
-                        data.sales = parsedData[index].sales;
-                    }
+                    data.sales = parsedData[index] ? parsedData[index].sales : data.sales;
                 });
+            } else {
+                saveSalesData();
             }
         }
 
