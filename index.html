@@ -48,7 +48,7 @@
             margin: 20px 0;
             display: flex;
             justify-content: space-around;
-            text-align: center;
+            text-align: center.
         }
         .summary .card {
             flex: 1;
@@ -151,7 +151,6 @@
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.8.3/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.8.3/firebase-database.js"></script>
-
     <script>
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -165,7 +164,7 @@
         };
 
         // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
+        firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
         const users = [
@@ -389,10 +388,19 @@
         window.onload = checkLoginStatus;
 
         // Initial render
-        loadSalesData();
-        renderTable();
-        renderChart();
-        updateSummary();
+        function loadSalesData() {
+            firebase.database().ref('salesData').once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    salesData.forEach((item, index) => {
+                        item.sales = data[index].sales;
+                    });
+                    renderTable();
+                    renderChart();
+                    updateSummary();
+                }
+            });
+        }
     </script>
 </body>
 </html>
