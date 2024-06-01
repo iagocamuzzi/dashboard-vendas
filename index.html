@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Metas de Vendas Diárias - Maio</title>
+    <title>Dashboard de Metas de Vendas Diárias - Junho</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -96,7 +96,7 @@
     <div class="container" id="dashboard-container" style="display: none;">
         <div class="header text-center">
             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png" alt="Logomarca Cacau Show" class="logo">
-            <h1>Dashboard de Metas de Vendas Diárias - Maio</h1>
+            <h1>Dashboard de Metas de Vendas Diárias - Junho</h1>
         </div>
         <div class="summary">
             <div class="card">
@@ -116,7 +116,7 @@
             <div class="form-group row justify-content-center">
                 <label for="day" class="col-form-label">Dia:</label>
                 <div class="col-sm-2">
-                    <input type="number" class="form-control" id="day" min="1" max="31">
+                    <input type="number" class="form-control" id="day" min="1" max="30">
                 </div>
                 <label for="sales" class="col-form-label">Vendas Realizadas (R$):</label>
                 <div class="col-sm-2">
@@ -188,37 +188,36 @@
         }
 
         const salesData = [
-            { target: 0.00, sales: 0 },
-            { target: 1356, sales: 2067 },
-            { target: 1519, sales: 814 },
-            { target: 3171, sales: 2411 },
-            { target: 0.00, sales: 0 },
-            { target: 836, sales: 889 },
-            { target: 1728, sales: 1288 },
-            { target: 2297, sales: 1778 },
-            { target: 2851, sales: 3809 },
-            { target: 5872, sales: 3676 },
-            { target: 17798, sales: 18364 },
-            { target: 0.00, sales: 10202 },
-            { target: 1693, sales: 1268 },
-            { target: 1408, sales: 1254 },
-            { target: 682, sales: 1556 },
-            { target: 892, sales: 775 },
-            { target: 1064, sales: 0 },
-            { target: 1474, sales: 0 },
-            { target: 0.00, sales: 0 },
-            { target: 750, sales: 0 },
-            { target: 0.00, sales: 0 },
-            { target: 1141, sales: 0 },
-            { target: 1157, sales: 0 },
-            { target: 854, sales: 0 },
-            { target: 1840, sales: 0 },
-            { target: 0.00, sales: 0 },
-            { target: 850, sales: 0 },
-            { target: 1166, sales: 0 },
-            { target: 1439, sales: 0 },
-            { target: 0.00, sales: 0 },
-            { target: 1964, sales: 0 }
+            { target: 1611, sales: 0 },
+            { target: 0, sales: 0 },
+            { target: 1345, sales: 0 },
+            { target: 1530, sales: 0 },
+            { target: 1423, sales: 0 },
+            { target: 1651, sales: 0 },
+            { target: 3244, sales: 0 },
+            { target: 3560, sales: 0 },
+            { target: 0, sales: 0 },
+            { target: 1284, sales: 0 },
+            { target: 8581, sales: 0 },
+            { target: 32368, sales: 0 },
+            { target: 1705, sales: 0 },
+            { target: 1277, sales: 0 },
+            { target: 1730, sales: 0 },
+            { target: 0, sales: 0 },
+            { target: 1361, sales: 0 },
+            { target: 1102, sales: 0 },
+            { target: 1377, sales: 0 },
+            { target: 1331, sales: 0 },
+            { target: 727, sales: 0 },
+            { target: 1760, sales: 0 },
+            { target: 0, sales: 0 },
+            { target: 776, sales: 0 },
+            { target: 834, sales: 0 },
+            { target: 687, sales: 0 },
+            { target: 780, sales: 0 },
+            { target: 1185, sales: 0 },
+            { target: 1472, sales: 0 },
+            { target: 0, sales: 0 }
         ];
 
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -250,7 +249,7 @@
             const day = parseInt(document.getElementById('day').value);
             const sales = parseFloat(document.getElementById('sales').value);
 
-            if (day >= 1 && day <= 31 && !isNaN(sales) && sales >= 0) {
+            if (day >= 1 && day <= 30 && !isNaN(sales) && sales >= 0) {
                 salesData[day - 1].sales = sales;
                 lastUpdatedDay = day;
                 saveSalesData();
@@ -273,7 +272,7 @@
                 const sales = salesData[lastUpdatedDay - 1].sales;
                 const status = sales >= target ? 'Meta Atingida 🎉' : 'Meta Não Atingida ❌';
                 const message = `📅 Dia: ${lastUpdatedDay}\n🎯 Meta: R$ ${target.toFixed(2)}\n💰 Vendas Realizadas: R$ ${sales.toFixed(2)}\n📊 Status: ${status}`;
-                const phoneNumber = '5527997635942';  // Número de telefone do destinatário no formato internacional
+                const phoneNumber = '5527981829452';  // Número de telefone do destinatário no formato internacional
                 const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
 
                 window.open(whatsappUrl, '_blank');
@@ -287,7 +286,7 @@
             tableBody.innerHTML = '';
             const today = new Date().getDate();
             salesData.forEach((data, index) => {
-                const date = new Date(2024, 4, index + 1); // Maio de 2024
+                const date = new Date(2024, 5, index + 1); // Junho de 2024
                 const dayName = dayNames[date.getDay()];
                 const status = data.sales >= data.target ? 'Meta Atingida' : 'Meta Não Atingida';
                 const highlightClass = (index + 1 === today) ? 'highlight' : '';
@@ -304,27 +303,27 @@
 
         function renderChart() {
             const ctx = document.getElementById('salesChart').getContext('2d');
-            const labels = Array.from({ length: 31 }, (_, i) => `${i + 1} (${dayNames[new Date(2024, 4, i + 1).getDay()]})`);
+            const labels = Array.from({ length: 30 }, (_, i) => `${i + 1} (${dayNames[new Date(2024, 5, i + 1).getDay()]})`);
             const sales = salesData.map(data => data.sales);
             const targets = salesData.map(data => data.target);
             new Chart(ctx, {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [
                         {
                             label: 'Vendas Realizadas',
                             data: sales,
+                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
                             borderColor: 'rgba(75, 192, 192, 1)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            fill: false
+                            borderWidth: 1
                         },
                         {
                             label: 'Meta Diária',
                             data: targets,
+                            backgroundColor: 'rgba(255, 99, 132, 0.6)',
                             borderColor: 'rgba(255, 99, 132, 1)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            fill: false
+                            borderWidth: 1
                         }
                     ]
                 },
