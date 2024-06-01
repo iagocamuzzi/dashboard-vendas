@@ -101,11 +101,11 @@
         <div class="summary">
             <div class="card">
                 <h5>Total Meta do Mês</h5>
-                <p id="totalTarget">R$ 0.00</p>
+                <p id="totalTarget">R$ 0,00</p>
             </div>
             <div class="card">
                 <h5>Total Vendas Realizadas</h5>
-                <p id="totalSales">R$ 0.00</p>
+                <p id="totalSales">R$ 0,00</p>
             </div>
             <div class="card">
                 <h5>Percentual de Atingimento</h5>
@@ -222,6 +222,10 @@
 
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
         function resetSalesData() {
             salesData.forEach(data => data.sales = 0);
             saveSalesData();
@@ -271,7 +275,7 @@
                 const target = salesData[lastUpdatedDay - 1].target;
                 const sales = salesData[lastUpdatedDay - 1].sales;
                 const status = sales >= target ? 'Meta Atingida 🎉' : 'Meta Não Atingida ❌';
-                const message = `📅 Dia: ${lastUpdatedDay}\n🎯 Meta: R$ ${target.toFixed(2)}\n💰 Vendas Realizadas: R$ ${sales.toFixed(2)}\n📊 Status: ${status}`;
+                const message = `📅 Dia: ${lastUpdatedDay}\n🎯 Meta: ${formatCurrency(target)}\n💰 Vendas Realizadas: ${formatCurrency(sales)}\n📊 Status: ${status}`;
                 const phoneNumber = '5527981829452';  // Número de telefone do destinatário no formato internacional
                 const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
 
@@ -293,8 +297,8 @@
                 tableBody.innerHTML += `
                     <tr class="${highlightClass}">
                         <td>${index + 1} (${dayName})</td>
-                        <td>R$ ${data.target.toFixed(2)}</td>
-                        <td>R$ ${data.sales.toFixed(2)}</td>
+                        <td>${formatCurrency(data.target)}</td>
+                        <td>${formatCurrency(data.sales)}</td>
                         <td>${status}</td>
                     </tr>
                 `;
@@ -342,8 +346,8 @@
             const totalSales = salesData.reduce((sum, data) => sum + data.sales, 0);
             const achievementRate = (totalSales / totalTarget) * 100;
 
-            document.getElementById('totalTarget').innerText = `R$ ${totalTarget.toFixed(2)}`;
-            document.getElementById('totalSales').innerText = `R$ ${totalSales.toFixed(2)}`;
+            document.getElementById('totalTarget').innerText = formatCurrency(totalTarget);
+            document.getElementById('totalSales').innerText = formatCurrency(totalSales);
             document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
         }
 
