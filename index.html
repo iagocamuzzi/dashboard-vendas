@@ -48,7 +48,7 @@
             margin: 20px 0;
             display: flex;
             justify-content: space-around;
-            text-align: center;
+            text-align: center.
         }
         .summary .card {
             flex: 1;
@@ -148,8 +148,26 @@
         <button class="btn btn-danger" onclick="logout()">Logout</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.8.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.8.3/firebase-database.js"></script>
+
     <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgUn5EBlVhbhYhyWjyrzfOAjadf9v6Pms",
+            authDomain: "dashboardcs-b46d8.firebaseapp.com",
+            projectId: "dashboardcs-b46d8",
+            storageBucket: "dashboardcs-b46d8.appspot.com",
+            messagingSenderId: "214815582221",
+            appId: "1:214815582221:web:842f78088a3e5b901c8d44",
+            databaseURL: "https://dashboardcs-b46d8-default-rtdb.firebaseio.com/"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
         const users = [
             { username: 'iago', password: '123456' },
             { username: 'larissa', password: '123456' },
@@ -174,8 +192,18 @@
                 renderTable();
                 renderChart();
                 updateSummary();
-                // Adiciona listener para o storage event
-                window.addEventListener('storage', syncSalesData);
+                // Listen for changes in Firebase Realtime Database
+                database.ref('salesData').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        salesData.forEach((item, index) => {
+                            item.sales = data[index].sales;
+                        });
+                        renderTable();
+                        renderChart();
+                        updateSummary();
+                    }
+                });
             } else {
                 document.getElementById('login-error').style.display = 'block';
             }
@@ -226,27 +254,8 @@
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        function resetSalesData() {
-            salesData.forEach(data => data.sales = 0);
-            saveSalesData();
-            localStorage.setItem('updateTrigger', new Date().toISOString());
-        }
-
-        // Load sales data from localStorage
-        function loadSalesData() {
-            const savedData = localStorage.getItem('salesData');
-            if (savedData) {
-                const parsedData = JSON.parse(savedData);
-                salesData.forEach((data, index) => {
-                    data.sales = parsedData[index] ? parsedData[index].sales : data.sales;
-                });
-            } else {
-                saveSalesData();
-            }
-        }
-
         function saveSalesData() {
-            localStorage.setItem('salesData', JSON.stringify(salesData));
+            firebase.database().ref('salesData').set(salesData);
         }
 
         function updateSales() {
@@ -263,8 +272,6 @@
                 // Limpar os campos de entrada
                 document.getElementById('day').value = '';
                 document.getElementById('sales').value = '';
-                // Trigger storage event
-                localStorage.setItem('updateTrigger', new Date().toISOString());
             } else {
                 alert('Por favor, insira um dia válido e um valor de vendas.');
             }
@@ -351,15 +358,6 @@
             document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
         }
 
-        function syncSalesData(event) {
-            if (event.key === 'salesData') {
-                loadSalesData();
-                renderTable();
-                renderChart();
-                updateSummary();
-            }
-        }
-
         function checkLoginStatus() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             const loginTime = localStorage.getItem('loginTime');
@@ -373,7 +371,6 @@
                 renderTable();
                 renderChart();
                 updateSummary();
-                window.addEventListener('storage', syncSalesData);
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
