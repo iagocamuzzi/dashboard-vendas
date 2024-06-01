@@ -48,7 +48,7 @@
             margin: 20px 0;
             display: flex;
             justify-content: space-around;
-            text-align: center.
+            text-align: center;
         }
         .summary .card {
             flex: 1;
@@ -180,6 +180,8 @@
             const username = document.getElementById('username').value.toLowerCase();
             const password = document.getElementById('password').value;
 
+            console.log('Tentativa de login com usuário:', username);
+
             const user = users.find(user => user.username === username && user.password === password);
 
             if (user) {
@@ -206,6 +208,7 @@
                 });
             } else {
                 document.getElementById('login-error').style.display = 'block';
+                console.log('Usuário ou senha incorretos');
             }
         }
 
