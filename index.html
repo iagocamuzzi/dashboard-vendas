@@ -406,6 +406,19 @@
                     updateSummary();
                 }
             });
+
+            // Listen for changes in Firebase Realtime Database
+            database.ref('salesData').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    salesData.forEach((item, index) => {
+                        item.sales = data[index].sales;
+                    });
+                    renderTable();
+                    renderChart();
+                    updateSummary();
+                }
+            });
         }
     </script>
 </body>
