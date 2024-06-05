@@ -178,6 +178,7 @@
         ];
 
         let lastUpdatedDay = null;
+        let salesChart = null;
 
         function login() {
             const username = document.getElementById('username').value.toLowerCase();
@@ -202,7 +203,7 @@
                 // Listen for changes in Firebase Realtime Database
                 database.ref('salesData').on('value', (snapshot) => {
                     const data = snapshot.val();
-                    console.log('Dados recebidos do Firebase:', data);
+                    console.log('Dados recebidos do Firebase em tempo real:', data);
                     if (data) {
                         salesData.forEach((item, index) => {
                             item.sales = data[index].sales;
@@ -327,7 +328,13 @@
             const labels = Array.from({ length: 30 }, (_, i) => `${i + 1} (${dayNames[new Date(2024, 5, i + 1).getDay()]})`);
             const sales = salesData.map(data => data.sales);
             const targets = salesData.map(data => data.target);
-            new Chart(ctx, {
+
+            // Destroy the existing chart if it exists
+            if (salesChart) {
+                salesChart.destroy();
+            }
+
+            salesChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
