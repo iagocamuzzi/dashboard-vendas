@@ -75,6 +75,14 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
+        .status-atingida {
+            font-weight: bold;
+            color: green;
+        }
+        .status-nao-atingida {
+            font-weight: bold;
+            color: red;
+        }
     </style>
 </head>
 <body>
@@ -310,14 +318,19 @@
             salesData.forEach((data, index) => {
                 const date = new Date(2024, 5, index + 1); // Junho de 2024
                 const dayName = dayNames[date.getDay()];
-                const status = data.sales >= data.target ? 'Meta Atingida' : 'Meta Não Atingida';
+                let status = '';
+                let statusClass = '';
+                if (data.sales > 0) {
+                    status = data.sales >= data.target ? 'Meta Atingida' : 'Meta Não Atingida';
+                    statusClass = data.sales >= data.target ? 'status-atingida' : 'status-nao-atingida';
+                }
                 const highlightClass = (index + 1 === today) ? 'highlight' : '';
                 tableBody.innerHTML += `
                     <tr class="${highlightClass}">
                         <td>${index + 1} (${dayName})</td>
                         <td>${formatCurrency(data.target)}</td>
                         <td>${formatCurrency(data.sales)}</td>
-                        <td>${status}</td>
+                        <td class="${statusClass}">${status}</td>
                     </tr>
                 `;
             });
@@ -356,9 +369,26 @@
                     ]
                 },
                 options: {
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return formatCurrency(context.raw);
+                                }
+                            }
+                        }
+                    },
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return formatCurrency(value);
+                                }
+                            }
                         }
                     }
                 }
