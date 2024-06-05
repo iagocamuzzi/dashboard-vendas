@@ -180,10 +180,12 @@
             const password = document.getElementById('password').value;
 
             console.log('Tentativa de login com usuário:', username);
+            console.log('Verificando usuário e senha...');
 
             const user = users.find(user => user.username === username && user.password === password);
 
             if (user) {
+                console.log('Login bem-sucedido');
                 const loginTime = new Date().getTime();
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('loginTime', loginTime);
