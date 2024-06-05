@@ -380,4 +380,33 @@
                 renderChart();
                 updateSummary();
             } else {
-                localStorage.remove
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('loginTime');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('loginTime');
+            location.reload();
+        }
+
+        window.onload = checkLoginStatus;
+
+        // Initial render
+        function loadSalesData() {
+            firebase.database().ref('salesData').once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    salesData.forEach((item, index) => {
+                        item.sales = data[index].sales;
+                    });
+                    renderTable();
+                    renderChart();
+                    updateSummary();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
