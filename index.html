@@ -202,6 +202,7 @@
                 // Listen for changes in Firebase Realtime Database
                 database.ref('salesData').on('value', (snapshot) => {
                     const data = snapshot.val();
+                    console.log('Dados recebidos do Firebase:', data);
                     if (data) {
                         salesData.forEach((item, index) => {
                             item.sales = data[index].sales;
@@ -263,6 +264,7 @@
         }
 
         function saveSalesData() {
+            console.log('Salvando dados no Firebase:', salesData);
             firebase.database().ref('salesData').set(salesData);
         }
 
@@ -397,6 +399,7 @@
         function loadSalesData() {
             firebase.database().ref('salesData').once('value').then((snapshot) => {
                 const data = snapshot.val();
+                console.log('Dados carregados do Firebase:', data);
                 if (data) {
                     salesData.forEach((item, index) => {
                         item.sales = data[index].sales;
@@ -410,6 +413,7 @@
             // Listen for changes in Firebase Realtime Database
             database.ref('salesData').on('value', (snapshot) => {
                 const data = snapshot.val();
+                console.log('Dados recebidos do Firebase em tempo real:', data);
                 if (data) {
                     salesData.forEach((item, index) => {
                         item.sales = data[index].sales;
