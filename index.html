@@ -48,7 +48,7 @@
             margin: 20px 0;
             display: flex;
             justify-content: space-around;
-            text-align: center.
+            text-align: center;
         }
         .summary .card {
             flex: 1;
@@ -217,6 +217,7 @@
                     console.log('Dados recebidos do Firebase em tempo real:', data);
                     if (data) {
                         salesData.forEach((item, index) => {
+                            item.target = data[index].target;
                             item.sales = data[index].sales;
                         });
                         renderTable();
@@ -451,6 +452,12 @@
         }
 
         window.onload = checkLoginStatus;
+
+        // Initial render
+        loadSalesData();
+        renderTable();
+        renderChart();
+        updateSummary();
     </script>
 </body>
 </html>
