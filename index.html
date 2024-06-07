@@ -278,7 +278,7 @@
 
         function saveSalesData() {
             console.log('Salvando dados no Firebase:', salesData);
-            firebase.database().ref('salesData').set(salesData);
+            database.ref('salesData').set(salesData);
         }
 
         function updateSales() {
@@ -449,6 +449,22 @@
             localStorage.removeItem('loginTime');
             localStorage.removeItem('userRole'); // Remove o papel do usuário
             location.reload();
+        }
+
+        function loadSalesData() {
+            database.ref('salesData').once('value').then((snapshot) => {
+                const data = snapshot.val();
+                console.log('Dados carregados do Firebase:', data);
+                if (data) {
+                    salesData.forEach((item, index) => {
+                        item.target = data[index].target;
+                        item.sales = data[index].sales;
+                    });
+                    renderTable();
+                    renderChart();
+                    updateSummary();
+                }
+            });
         }
 
         window.onload = checkLoginStatus;
