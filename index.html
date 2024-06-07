@@ -180,13 +180,14 @@
         const database = firebase.database();
 
         const users = [
-            { username: 'iago', password: '123456' },
-            { username: 'larissa', password: '123456' },
-            { username: 'mariaeduarda', password: '123456' }
+            { username: 'iago', password: '021092', role: 'admin' },
+            { username: 'larissa', password: '123456', role: 'user' },
+            { username: 'mariaeduarda', password: '123456', role: 'user' }
         ];
 
         let lastUpdatedDay = null;
         let salesChart = null;
+        let currentUserRole = 'user';
 
         function login() {
             const username = document.getElementById('username').value.toLowerCase();
@@ -199,6 +200,7 @@
 
             if (user) {
                 console.log('Login bem-sucedido');
+                currentUserRole = user.role;
                 const loginTime = new Date().getTime();
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('loginTime', loginTime);
@@ -328,12 +330,25 @@
                 tableBody.innerHTML += `
                     <tr class="${highlightClass}">
                         <td>${index + 1} (${dayName})</td>
-                        <td>${formatCurrency(data.target)}</td>
+                        <td ${currentUserRole === 'admin' ? 'contenteditable="true" onblur="updateTarget(this, ${index})"' : ''}>${formatCurrency(data.target)}</td>
                         <td>${formatCurrency(data.sales)}</td>
                         <td class="${statusClass}">${status}</td>
                     </tr>
                 `;
             });
+        }
+
+        function updateTarget(element, index) {
+            const newTarget = parseFloat(element.innerText.replace(/[^\d,]/g, '').replace(',', '.'));
+            if (!isNaN(newTarget) && newTarget >= 0) {
+                salesData[index].target = newTarget;
+                saveSalesData();
+                updateSummary();
+                renderChart();
+            } else {
+                alert('Por favor, insira um valor de meta válido.');
+                element.innerText = formatCurrency(salesData[index].target);
+            }
         }
 
         function renderChart() {
