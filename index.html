@@ -180,7 +180,7 @@
         const database = firebase.database();
 
         const users = [
-            { username: 'iago', password: '021092', role: 'admin' },
+            { username: 'iago', password: '123456', role: 'admin' },
             { username: 'larissa', password: '123456', role: 'user' },
             { username: 'mariaeduarda', password: '123456', role: 'user' }
         ];
@@ -204,6 +204,7 @@
                 const loginTime = new Date().getTime();
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('loginTime', loginTime);
+                localStorage.setItem('userRole', user.role); // Armazena o papel do usuário
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
                 loadSalesData();
@@ -304,7 +305,7 @@
                 const sales = salesData[lastUpdatedDay - 1].sales;
                 const status = sales >= target ? 'Meta Atingida 🎉' : 'Meta Não Atingida ❌';
                 const message = `📅 Dia: ${lastUpdatedDay}\n🎯 Meta: ${formatCurrency(target)}\n💰 Vendas Realizadas: ${formatCurrency(sales)}\n📊 Status: ${status}`;
-                const phoneNumber = '5527997635942';  // Número de telefone do destinatário no formato internacional
+                const phoneNumber = '5527981829452';  // Número de telefone do destinatário no formato internacional
                 const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
 
                 window.open(whatsappUrl, '_blank');
@@ -423,12 +424,14 @@
         function checkLoginStatus() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             const loginTime = localStorage.getItem('loginTime');
+            const userRole = localStorage.getItem('userRole'); // Obtém o papel do usuário
             const currentTime = new Date().getTime();
             const sessionDuration = 5 * 60 * 1000; // 5 minutos em milissegundos
 
             if (isLoggedIn === 'true' && (currentTime - loginTime) < sessionDuration) {
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
+                currentUserRole = userRole; // Define o papel do usuário atual
                 loadSalesData();
                 renderTable();
                 renderChart();
@@ -436,46 +439,18 @@
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
+                localStorage.removeItem('userRole'); // Remove o papel do usuário
             }
         }
 
         function logout() {
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('loginTime');
+            localStorage.removeItem('userRole'); // Remove o papel do usuário
             location.reload();
         }
 
         window.onload = checkLoginStatus;
-
-        // Initial render
-        function loadSalesData() {
-            firebase.database().ref('salesData').once('value').then((snapshot) => {
-                const data = snapshot.val();
-                console.log('Dados carregados do Firebase:', data);
-                if (data) {
-                    salesData.forEach((item, index) => {
-                        item.sales = data[index].sales;
-                    });
-                    renderTable();
-                    renderChart();
-                    updateSummary();
-                }
-            });
-
-            // Listen for changes in Firebase Realtime Database
-            database.ref('salesData').on('value', (snapshot) => {
-                const data = snapshot.val();
-                console.log('Dados recebidos do Firebase em tempo real:', data);
-                if (data) {
-                    salesData.forEach((item, index) => {
-                        item.sales = data[index].sales;
-                    });
-                    renderTable();
-                    renderChart();
-                    updateSummary();
-                }
-            });
-        }
     </script>
 </body>
 </html>
