@@ -66,6 +66,17 @@
             font-size: 1.2em;
             margin: 0;
         }
+        .remuneration-container {
+            margin-top: 40px;
+        }
+        .remuneration-table {
+            width: 100%;
+            margin-top: 20px;
+        }
+        .remuneration-table th, .remuneration-table td {
+            padding: 10px;
+            text-align: center;
+        }
         /* Remove arrows from input number fields */
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button {
@@ -154,6 +165,24 @@
             <canvas id="salesChart" width="600" height="300"></canvas>
         </div>
         <button class="btn btn-danger" onclick="logout()">Logout</button>
+
+        <!-- Container de Remuneração Variável -->
+        <div class="remuneration-container">
+            <h2 class="text-center">Remuneração Variável das Vendedoras</h2>
+            <table class="table table-bordered remuneration-table">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Vendedora</th>
+                        <th>Meta (R$)</th>
+                        <th>Vendas Realizadas (R$)</th>
+                        <th>Percentual de Atingimento</th>
+                    </tr>
+                </thead>
+                <tbody id="remunerationTable">
+                    <!-- Table rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Biblioteca Chart.js -->
@@ -211,6 +240,7 @@
                 renderTable();
                 renderChart();
                 updateSummary();
+                updateRemunerationTable();
                 // Listen for changes in Firebase Realtime Database
                 database.ref('salesData').on('value', (snapshot) => {
                     const data = snapshot.val();
@@ -223,6 +253,7 @@
                         renderTable();
                         renderChart();
                         updateSummary();
+                        updateRemunerationTable();
                     }
                 });
             } else {
@@ -272,6 +303,12 @@
 
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
+        const remunerationData = [
+            { name: 'Vendedora 1', totalSales: 0, target: 50000 },
+            { name: 'Vendedora 2', totalSales: 0, target: 60000 },
+            { name: 'Vendedora 3', totalSales: 0, target: 55000 }
+        ];
+
         function formatCurrency(value) {
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
@@ -292,6 +329,7 @@
                 renderTable();
                 renderChart();
                 updateSummary();
+                updateRemunerationTable();
                 // Limpar os campos de entrada
                 document.getElementById('day').value = '';
                 document.getElementById('sales').value = '';
@@ -306,7 +344,7 @@
                 const sales = salesData[lastUpdatedDay - 1].sales;
                 const status = sales >= target ? 'Meta Atingida 🎉' : 'Meta Não Atingida ❌';
                 const message = `📅 Dia: ${lastUpdatedDay}\n🎯 Meta: ${formatCurrency(target)}\n💰 Vendas Realizadas: ${formatCurrency(sales)}\n📊 Status: ${status}`;
-                const phoneNumber = '5527997635942';  // Número de telefone do destinatário no formato internacional
+                const phoneNumber = '5527981829452';  // Número de telefone do destinatário no formato internacional
                 const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
 
                 window.open(whatsappUrl, '_blank');
@@ -422,6 +460,22 @@
             document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
         }
 
+        function updateRemunerationTable() {
+            const tableBody = document.getElementById('remunerationTable');
+            tableBody.innerHTML = '';
+            remunerationData.forEach((data) => {
+                const achievementRate = (data.totalSales / data.target) * 100;
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${data.name}</td>
+                        <td>${formatCurrency(data.target)}</td>
+                        <td>${formatCurrency(data.totalSales)}</td>
+                        <td>${achievementRate.toFixed(2)}%</td>
+                    </tr>
+                `;
+            });
+        }
+
         function checkLoginStatus() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             const loginTime = localStorage.getItem('loginTime');
@@ -437,6 +491,7 @@
                 renderTable();
                 renderChart();
                 updateSummary();
+                updateRemunerationTable();
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
@@ -463,6 +518,7 @@
                     renderTable();
                     renderChart();
                     updateSummary();
+                    updateRemunerationTable();
                 }
             });
         }
