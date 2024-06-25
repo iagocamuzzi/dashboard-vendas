@@ -168,12 +168,12 @@
 
         <!-- Container de Remuneração Variável -->
         <div class="remuneration-container">
-            <h2 class="text-center">Remuneração Variável das Vendedoras</h2>
+            <h2 class="text-center">Remuneração Variável da Consultora Show</h2>
             <table class="table table-bordered remuneration-table">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Vendedora</th>
-                        <th>Meta (R$)</th>
+                        <th>Consultora</th>
+                        <th>Meta do Mês (R$)</th>
                         <th>Vendas Realizadas (R$)</th>
                         <th>Percentual de Atingimento</th>
                     </tr>
@@ -302,12 +302,6 @@
         ];
 
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-
-        const remunerationData = [
-            { name: 'Vendedora 1', totalSales: 0, target: 50000 },
-            { name: 'Vendedora 2', totalSales: 0, target: 60000 },
-            { name: 'Vendedora 3', totalSales: 0, target: 55000 }
-        ];
 
         function formatCurrency(value) {
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -461,19 +455,19 @@
         }
 
         function updateRemunerationTable() {
+            const totalTarget = salesData.reduce((sum, data) => sum + data.target, 0);
+            const totalSales = salesData.reduce((sum, data) => sum + data.sales, 0);
+            const achievementRate = (totalSales / totalTarget) * 100;
+
             const tableBody = document.getElementById('remunerationTable');
-            tableBody.innerHTML = '';
-            remunerationData.forEach((data) => {
-                const achievementRate = (data.totalSales / data.target) * 100;
-                tableBody.innerHTML += `
-                    <tr>
-                        <td>${data.name}</td>
-                        <td>${formatCurrency(data.target)}</td>
-                        <td>${formatCurrency(data.totalSales)}</td>
-                        <td>${achievementRate.toFixed(2)}%</td>
-                    </tr>
-                `;
-            });
+            tableBody.innerHTML = `
+                <tr>
+                    <td>Consultora Show</td>
+                    <td>${formatCurrency(totalTarget)}</td>
+                    <td>${formatCurrency(totalSales)}</td>
+                    <td>${achievementRate.toFixed(2)}%</td>
+                </tr>
+            `;
         }
 
         function checkLoginStatus() {
