@@ -115,11 +115,16 @@
             const newScore = parseFloat(element.innerText);
             if (!isNaN(newScore) && newScore >= 0 && newScore <= 100) {
                 attendanceScore = newScore;
+                saveAttendanceScore();
                 updateRemunerationTable();
             } else {
                 alert('Por favor, insira uma nota de atendimento válida (0-100).');
                 element.innerText = attendanceScore;
             }
+        }
+
+        function saveAttendanceScore() {
+            database.ref('attendanceScore').set(attendanceScore);
         }
 
         function loadSalesData() {
@@ -132,6 +137,10 @@
                     });
                     updateRemunerationTable();
                 }
+            });
+            database.ref('attendanceScore').once('value').then((snapshot) => {
+                attendanceScore = snapshot.val() || 0;
+                updateRemunerationTable();
             });
         }
 
