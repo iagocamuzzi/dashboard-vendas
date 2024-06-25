@@ -75,6 +75,10 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
+        .admin-button {
+            display: none;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -146,6 +150,7 @@
             <canvas id="salesChart" width="600" height="300"></canvas>
         </div>
         <button class="btn btn-danger" onclick="logout()">Logout</button>
+        <button class="btn btn-info admin-button" onclick="window.location.href='remuneracao.html'">Ver Remuneração Variável</button>
     </div>
 
     <!-- Firebase -->
@@ -192,6 +197,9 @@
                 currentUserRole = user.role;
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
+                if (currentUserRole === 'admin') {
+                    document.querySelector('.admin-button').style.display = 'block';
+                }
                 loadSalesData();
             } else {
                 document.getElementById('login-error').style.display = 'block';
@@ -387,6 +395,9 @@
                 currentUserRole = userRole;
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
+                if (currentUserRole === 'admin') {
+                    document.querySelector('.admin-button').style.display = 'block';
+                }
                 loadSalesData();
             } else {
                 localStorage.removeItem('isLoggedIn');
