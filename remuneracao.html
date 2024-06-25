@@ -67,18 +67,31 @@
         const database = firebase.database();
 
         const salesData = [];
-        const remunerationRate = 0.05; // Taxa de remuneração, 5% das vendas realizadas
         const attendanceScore = 9.5; // Nota de atendimento (exemplo fixo)
 
         function formatCurrency(value) {
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
+        function calculateRemuneration(achievementRate) {
+            if (achievementRate < 92) {
+                return 0;
+            } else if (achievementRate < 100) {
+                return 70;
+            } else if (achievementRate < 105) {
+                return 140;
+            } else if (achievementRate <= 120) {
+                return 140 * (achievementRate / 100);
+            } else {
+                return 140 * 1.2;
+            }
+        }
+
         function updateRemunerationTable() {
             const totalTarget = salesData.reduce((sum, data) => sum + data.target, 0);
             const totalSales = salesData.reduce((sum, data) => sum + data.sales, 0);
             const achievementRate = (totalSales / totalTarget) * 100;
-            const remuneration = totalSales * remunerationRate;
+            const remuneration = calculateRemuneration(achievementRate);
 
             const tableBody = document.getElementById('remunerationTable');
             tableBody.innerHTML = `
