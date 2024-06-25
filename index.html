@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Metas de Vendas Diárias - Junho</title>
+    <title>Remuneração Variável - Consultora Show</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -18,145 +18,37 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
         }
-        .chart-container {
-            margin-top: 20px;
-        }
-        .login-container {
-            max-width: 400px;
-            margin: auto;
-            margin-top: 50px;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        .logo {
-            display: block;
-            margin: 0 auto 20px;
-            max-width: 100%;
-            height: auto;
-        }
-        .header .logo {
-            float: left;
-            margin-right: 20px;
-            margin-bottom: 10px;
-        }
-        .highlight {
-            background-color: #ffff99 !important;
-        }
-        .summary {
-            margin: 20px 0;
-            display: flex;
-            justify-content: space-around;
-            text-align: center;
-        }
-        .summary .card {
-            flex: 1;
-            margin: 10px;
-            padding: 20px;
-            background-color: #007bff;
-            color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-        .summary .card h5 {
-            margin-bottom: 15px;
-        }
-        .summary .card p {
-            font-size: 1.2em;
-            margin: 0;
-        }
-        /* Remove arrows from input number fields */
-        input[type=number]::-webkit-outer-spin-button,
-        input[type=number]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-        .admin-button {
-            display: none;
+        .table-container {
             margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="login-container" id="login-container">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png" alt="Logomarca Cacau Show" class="logo">
-        <h2>Login</h2>
-        <div class="form-group">
-            <label for="username">Usuário:</label>
-            <input type="text" class="form-control" id="username" onkeypress="checkEnter(event)" autocomplete="username">
-        </div>
-        <div class="form-group">
-            <label for="password">Senha:</label>
-            <input type="password" class="form-control" id="password" onkeypress="checkEnter(event)" autocomplete="current-password">
-        </div>
-        <button class="btn btn-primary btn-block" onclick="login()">Entrar</button>
-        <p id="login-error" class="text-danger" style="display: none;">Usuário ou senha incorretos.</p>
-    </div>
-
-    <div class="container" id="dashboard-container" style="display: none;">
-        <div class="header text-center">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png" alt="Logomarca Cacau Show" class="logo">
-            <h1>Dashboard de Metas de Vendas Diárias - Junho</h1>
-        </div>
-        <div class="summary">
-            <div class="card">
-                <h5>Total Meta do Mês</h5>
-                <p id="totalTarget">R$ 0,00</p>
-            </div>
-            <div class="card">
-                <h5>Total Vendas Realizadas</h5>
-                <p id="totalSales">R$ 0,00</p>
-            </div>
-            <div class="card">
-                <h5>Percentual de Atingimento</h5>
-                <p id="achievementRate">0%</p>
-            </div>
-        </div>
-        <div class="form-container text-center">
-            <div class="form-group row justify-content-center">
-                <label for="day" class="col-form-label">Dia:</label>
-                <div class="col-sm-2">
-                    <input type="number" class="form-control" id="day" min="1" max="30">
-                </div>
-                <label for="sales" class="col-form-label">Vendas Realizadas (R$):</label>
-                <div class="col-sm-2">
-                    <input type="number" class="form-control" id="sales">
-                </div>
-                <button class="btn btn-primary" onclick="updateSales()">Atualizar</button>
-                <button class="btn btn-success ml-2" onclick="sendWhatsAppMessage()">Enviar WhatsApp</button>
-            </div>
-        </div>
+    <div class="container">
+        <h1 class="text-center">Remuneração Variável - Consultora Show</h1>
         <div class="table-container">
             <table class="table table-bordered table-striped">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Dia</th>
-                        <th>Meta (R$)</th>
+                        <th>Nome</th>
+                        <th>Meta do Mês (R$)</th>
                         <th>Vendas Realizadas (R$)</th>
-                        <th>Status</th>
+                        <th>Percentual de Atingimento</th>
+                        <th>Remuneração (R$)</th>
+                        <th>Nota de Atendimento</th>
                     </tr>
                 </thead>
-                <tbody id="salesTable">
+                <tbody id="remunerationTable">
                     <!-- Table rows will be inserted here by JavaScript -->
                 </tbody>
             </table>
         </div>
-        <div class="chart-container">
-            <h2 class="text-center">Progresso das Vendas</h2>
-            <canvas id="salesChart" width="600" height="300"></canvas>
-        </div>
-        <button class="btn btn-danger" onclick="logout()">Logout</button>
-        <button class="btn btn-info admin-button" onclick="window.location.href='remuneracao.html'">Ver Remuneração Variável</button>
+        <a href="index.html" class="btn btn-info mt-3">Voltar ao Dashboard</a>
     </div>
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         // Your web app's Firebase configuration
@@ -174,249 +66,60 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const users = [
-            { username: 'iago', password: '123456', role: 'admin' },
-            { username: 'larissa', password: '123456', role: 'user' },
-            { username: 'mariaeduarda', password: '123456', role: 'user' }
-        ];
-
-        let lastUpdatedDay = null;
-        let currentUserRole = null;
-
-        function login() {
-            const username = document.getElementById('username').value.toLowerCase();
-            const password = document.getElementById('password').value;
-
-            const user = users.find(user => user.username === username && user.password === password);
-
-            if (user) {
-                const loginTime = new Date().getTime();
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('loginTime', loginTime);
-                localStorage.setItem('userRole', user.role); // Save user role
-                currentUserRole = user.role;
-                document.getElementById('login-container').style.display = 'none';
-                document.getElementById('dashboard-container').style.display = 'block';
-                if (currentUserRole === 'admin') {
-                    document.querySelector('.admin-button').style.display = 'block';
-                }
-                loadSalesData();
-            } else {
-                document.getElementById('login-error').style.display = 'block';
-            }
-        }
-
-        function checkEnter(event) {
-            if (event.key === 'Enter') {
-                login();
-            }
-        }
-
-        const salesData = [
-            { target: 1611, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1345, sales: 0 },
-            { target: 1530, sales: 0 },
-            { target: 1423, sales: 0 },
-            { target: 1651, sales: 0 },
-            { target: 3244, sales: 0 },
-            { target: 3560, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1284, sales: 0 },
-            { target: 8581, sales: 0 },
-            { target: 32368, sales: 0 },
-            { target: 1705, sales: 0 },
-            { target: 1277, sales: 0 },
-            { target: 1730, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1361, sales: 0 },
-            { target: 1102, sales: 0 },
-            { target: 1377, sales: 0 },
-            { target: 1331, sales: 0 },
-            { target: 727, sales: 0 },
-            { target: 1760, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 776, sales: 0 },
-            { target: 834, sales: 0 },
-            { target: 687, sales: 0 },
-            { target: 780, sales: 0 },
-            { target: 1185, sales: 0 },
-            { target: 1472, sales: 0 },
-            { target: 0, sales: 0 }
-        ];
-
-        const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+        const salesData = [];
+        const attendanceScore = 9.5; // Nota de atendimento (exemplo fixo)
 
         function formatCurrency(value) {
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        function saveSalesData() {
-            const currentDate = new Date();
-            const month = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`; // Formato YYYY-MM
-            console.log('Salvando dados no Firebase:', salesData);
-            database.ref(`salesData/${month}`).set(salesData);
-        }
-
-        function updateSales() {
-            const day = parseInt(document.getElementById('day').value);
-            const sales = parseFloat(document.getElementById('sales').value);
-
-            if (day >= 1 && day <= 30 && !isNaN(sales) && sales >= 0) {
-                salesData[day - 1].sales = sales;
-                lastUpdatedDay = day;
-                saveSalesData();
-                renderTable();
-                renderChart();
-                updateSummary();
-                // Limpar os campos de entrada
-                document.getElementById('day').value = '';
-                document.getElementById('sales').value = '';
+        function calculateRemuneration(achievementRate) {
+            if (achievementRate < 92) {
+                return 0;
+            } else if (achievementRate < 100) {
+                return 70;
+            } else if (achievementRate < 105) {
+                return 140;
+            } else if (achievementRate <= 120) {
+                return 140 * (achievementRate / 100);
             } else {
-                alert('Por favor, insira um dia válido e um valor de vendas.');
+                return 140 * 1.2;
             }
         }
 
-        function sendWhatsAppMessage() {
-            if (lastUpdatedDay !== null) {
-                const target = salesData[lastUpdatedDay - 1].target;
-                const sales = salesData[lastUpdatedDay - 1].sales;
-                const status = sales >= target ? 'Meta Atingida 🎉' : 'Meta Não Atingida ❌';
-                const message = `📅 Dia: ${lastUpdatedDay}\n🎯 Meta: ${formatCurrency(target)}\n💰 Vendas Realizadas: ${formatCurrency(sales)}\n📊 Status: ${status}`;
-                const phoneNumber = '5527981829452';  // Número de telefone do destinatário no formato internacional
-                const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
-
-                window.open(whatsappUrl, '_blank');
-            } else {
-                alert('Por favor, atualize as vendas de um dia primeiro.');
-            }
-        }
-
-        function renderTable() {
-            const tableBody = document.getElementById('salesTable');
-            tableBody.innerHTML = '';
-            const today = new Date().getDate();
-            salesData.forEach((data, index) => {
-                const date = new Date(2024, 5, index + 1); // Junho de 2024
-                const dayName = dayNames[date.getDay()];
-                let status = '';
-                let statusClass = '';
-                if (data.sales > 0) {
-                    status = data.sales >= data.target ? 'Meta Atingida' : 'Meta Não Atingida';
-                    statusClass = data.sales >= data.target ? 'text-success font-weight-bold' : 'text-danger font-weight-bold';
-                }
-                const highlightClass = (index + 1 === today) ? 'highlight' : '';
-                tableBody.innerHTML += `
-                    <tr class="${highlightClass}">
-                        <td>${index + 1} (${dayName})</td>
-                        <td>${formatCurrency(data.target)}</td>
-                        <td>${formatCurrency(data.sales)}</td>
-                        <td class="${statusClass}">${status}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        function renderChart() {
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            if (window.salesChart) {
-                window.salesChart.destroy();
-            }
-            const labels = Array.from({ length: 30 }, (_, i) => `${i + 1} (${dayNames[new Date(2024, 5, i + 1).getDay()]})`);
-            const sales = salesData.map(data => data.sales);
-            const targets = salesData.map(data => data.target);
-            window.salesChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Vendas Realizadas',
-                            data: sales,
-                            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1
-                        },
-                        {
-                            label: 'Meta Diária',
-                            data: targets,
-                            backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                            borderColor: 'rgba(255, 99, 132, 1)',
-                            borderWidth: 1
-                        }
-                    ]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateSummary() {
+        function updateRemunerationTable() {
             const totalTarget = salesData.reduce((sum, data) => sum + data.target, 0);
             const totalSales = salesData.reduce((sum, data) => sum + data.sales, 0);
             const achievementRate = (totalSales / totalTarget) * 100;
+            const remuneration = calculateRemuneration(achievementRate);
 
-            document.getElementById('totalTarget').innerText = formatCurrency(totalTarget);
-            document.getElementById('totalSales').innerText = formatCurrency(totalSales);
-            document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
+            const tableBody = document.getElementById('remunerationTable');
+            tableBody.innerHTML = `
+                <tr>
+                    <td>Consultora Show</td>
+                    <td>${formatCurrency(totalTarget)}</td>
+                    <td>${formatCurrency(totalSales)}</td>
+                    <td>${achievementRate.toFixed(2)}%</td>
+                    <td>${formatCurrency(remuneration)}</td>
+                    <td>${attendanceScore}</td>
+                </tr>
+            `;
         }
 
         function loadSalesData() {
-            const currentDate = new Date();
-            const month = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`; // Formato YYYY-MM
-            database.ref(`salesData/${month}`).once('value').then(snapshot => {
+            database.ref('salesData').once('value').then((snapshot) => {
                 const data = snapshot.val();
+                console.log('Dados carregados do Firebase:', data);
                 if (data) {
-                    console.log('Dados recebidos do Firebase:', data);
-                    salesData.forEach((item, index) => {
-                        item.target = data[index].target;
-                        item.sales = data[index].sales;
+                    data.forEach((item) => {
+                        salesData.push(item);
                     });
-                    renderTable();
-                    renderChart();
-                    updateSummary();
+                    updateRemunerationTable();
                 }
             });
         }
 
-        function checkLoginStatus() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            const loginTime = localStorage.getItem('loginTime');
-            const userRole = localStorage.getItem('userRole'); // Retrieve user role
-            const currentTime = new Date().getTime();
-            const sessionDuration = 5 * 60 * 1000; // 5 minutos em milissegundos
-
-            if (isLoggedIn === 'true' && (currentTime - loginTime) < sessionDuration) {
-                currentUserRole = userRole;
-                document.getElementById('login-container').style.display = 'none';
-                document.getElementById('dashboard-container').style.display = 'block';
-                if (currentUserRole === 'admin') {
-                    document.querySelector('.admin-button').style.display = 'block';
-                }
-                loadSalesData();
-            } else {
-                localStorage.removeItem('isLoggedIn');
-                localStorage.removeItem('loginTime');
-                localStorage.removeItem('userRole'); // Remove user role
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('loginTime');
-            localStorage.removeItem('userRole'); // Remove user role
-            location.reload();
-        }
-
-        window.onload = checkLoginStatus;
-
-        // Initial render
-        checkLoginStatus();
+        window.onload = loadSalesData;
     </script>
 </body>
 </html>
