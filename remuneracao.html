@@ -30,7 +30,6 @@
             <table class="table table-bordered table-striped">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Mês</th>
                         <th>Nome</th>
                         <th>Meta do Mês (R$)</th>
                         <th>Vendas Realizadas (R$)</th>
@@ -88,16 +87,15 @@
             }
         }
 
-        function updateRemunerationTable(monthlyData, month) {
-            const totalTarget = monthlyData.reduce((sum, data) => sum + data.target, 0);
-            const totalSales = monthlyData.reduce((sum, data) => sum + data.sales, 0);
+        function updateRemunerationTable() {
+            const totalTarget = salesData.reduce((sum, data) => sum + data.target, 0);
+            const totalSales = salesData.reduce((sum, data) => sum + data.sales, 0);
             const achievementRate = (totalSales / totalTarget) * 100;
             const remuneration = calculateRemuneration(achievementRate);
 
             const tableBody = document.getElementById('remunerationTable');
-            tableBody.innerHTML += `
+            tableBody.innerHTML = `
                 <tr>
-                    <td>${month}</td>
                     <td>Consultora Show</td>
                     <td>${formatCurrency(totalTarget)}</td>
                     <td>${formatCurrency(totalSales)}</td>
@@ -113,9 +111,10 @@
                 const data = snapshot.val();
                 console.log('Dados carregados do Firebase:', data);
                 if (data) {
-                    Object.keys(data).forEach(month => {
-                        updateRemunerationTable(data[month], month);
+                    data.forEach((item) => {
+                        salesData.push(item);
                     });
+                    updateRemunerationTable();
                 }
             });
         }
