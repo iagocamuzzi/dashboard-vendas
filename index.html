@@ -66,17 +66,6 @@
             font-size: 1.2em;
             margin: 0;
         }
-        .remuneration-container {
-            margin-top: 40px;
-        }
-        .remuneration-table {
-            width: 100%;
-            margin-top: 20px;
-        }
-        .remuneration-table th, .remuneration-table td {
-            padding: 10px;
-            text-align: center;
-        }
         /* Remove arrows from input number fields */
         input[type=number]::-webkit-outer-spin-button,
         input[type=number]::-webkit-inner-spin-button {
@@ -165,24 +154,7 @@
             <canvas id="salesChart" width="600" height="300"></canvas>
         </div>
         <button class="btn btn-danger" onclick="logout()">Logout</button>
-
-        <!-- Container de Remuneração Variável -->
-        <div class="remuneration-container">
-            <h2 class="text-center">Remuneração Variável da Consultora Show</h2>
-            <table class="table table-bordered remuneration-table">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Consultora</th>
-                        <th>Meta do Mês (R$)</th>
-                        <th>Vendas Realizadas (R$)</th>
-                        <th>Percentual de Atingimento</th>
-                    </tr>
-                </thead>
-                <tbody id="remunerationTable">
-                    <!-- Table rows will be inserted here by JavaScript -->
-                </tbody>
-            </table>
-        </div>
+        <a href="remuneracao.html" class="btn btn-info mt-3">Ver Remuneração Variável</a>
     </div>
 
     <!-- Biblioteca Chart.js -->
@@ -240,7 +212,6 @@
                 renderTable();
                 renderChart();
                 updateSummary();
-                updateRemunerationTable();
                 // Listen for changes in Firebase Realtime Database
                 database.ref('salesData').on('value', (snapshot) => {
                     const data = snapshot.val();
@@ -253,7 +224,6 @@
                         renderTable();
                         renderChart();
                         updateSummary();
-                        updateRemunerationTable();
                     }
                 });
             } else {
@@ -323,7 +293,6 @@
                 renderTable();
                 renderChart();
                 updateSummary();
-                updateRemunerationTable();
                 // Limpar os campos de entrada
                 document.getElementById('day').value = '';
                 document.getElementById('sales').value = '';
@@ -454,22 +423,6 @@
             document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
         }
 
-        function updateRemunerationTable() {
-            const totalTarget = salesData.reduce((sum, data) => sum + data.target, 0);
-            const totalSales = salesData.reduce((sum, data) => sum + data.sales, 0);
-            const achievementRate = (totalSales / totalTarget) * 100;
-
-            const tableBody = document.getElementById('remunerationTable');
-            tableBody.innerHTML = `
-                <tr>
-                    <td>Consultora Show</td>
-                    <td>${formatCurrency(totalTarget)}</td>
-                    <td>${formatCurrency(totalSales)}</td>
-                    <td>${achievementRate.toFixed(2)}%</td>
-                </tr>
-            `;
-        }
-
         function checkLoginStatus() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             const loginTime = localStorage.getItem('loginTime');
@@ -485,7 +438,6 @@
                 renderTable();
                 renderChart();
                 updateSummary();
-                updateRemunerationTable();
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
@@ -512,7 +464,6 @@
                     renderTable();
                     renderChart();
                     updateSummary();
-                    updateRemunerationTable();
                 }
             });
         }
