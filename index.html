@@ -75,14 +75,6 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
-        .status-atingida {
-            font-weight: bold;
-            color: green;
-        }
-        .status-nao-atingida {
-            font-weight: bold;
-            color: red;
-        }
     </style>
 </head>
 <body>
@@ -124,11 +116,11 @@
             <div class="form-group row justify-content-center">
                 <label for="day" class="col-form-label">Dia:</label>
                 <div class="col-sm-2">
-                    <input type="number" class="form-control" id="day" min="1" max="30" autocomplete="off">
+                    <input type="number" class="form-control" id="day" min="1" max="30">
                 </div>
                 <label for="sales" class="col-form-label">Vendas Realizadas (R$):</label>
                 <div class="col-sm-2">
-                    <input type="number" class="form-control" id="sales" autocomplete="off">
+                    <input type="number" class="form-control" id="sales">
                 </div>
                 <button class="btn btn-primary" onclick="updateSales()">Atualizar</button>
                 <button class="btn btn-success ml-2" onclick="sendWhatsAppMessage()">Enviar WhatsApp</button>
@@ -154,15 +146,12 @@
             <canvas id="salesChart" width="600" height="300"></canvas>
         </div>
         <button class="btn btn-danger" onclick="logout()">Logout</button>
-        <a href="remuneracao.html" class="btn btn-info mt-3">Ver Remuneração Variável</a>
     </div>
-
-    <!-- Biblioteca Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
         // Your web app's Firebase configuration
@@ -187,48 +176,28 @@
         ];
 
         let lastUpdatedDay = null;
-        let salesChart = null;
-        let currentUserRole = 'user';
+        let currentUserRole = null;
 
         function login() {
             const username = document.getElementById('username').value.toLowerCase();
             const password = document.getElementById('password').value;
 
-            console.log('Tentativa de login com usuário:', username);
-            console.log('Verificando usuário e senha...');
-
             const user = users.find(user => user.username === username && user.password === password);
 
             if (user) {
-                console.log('Login bem-sucedido');
-                currentUserRole = user.role;
                 const loginTime = new Date().getTime();
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('loginTime', loginTime);
-                localStorage.setItem('userRole', user.role); // Armazena o papel do usuário
+                localStorage.setItem('userRole', user.role); // Save user role
+                currentUserRole = user.role;
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
                 loadSalesData();
                 renderTable();
                 renderChart();
                 updateSummary();
-                // Listen for changes in Firebase Realtime Database
-                database.ref('salesData').on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    console.log('Dados recebidos do Firebase em tempo real:', data);
-                    if (data) {
-                        salesData.forEach((item, index) => {
-                            item.target = data[index].target;
-                            item.sales = data[index].sales;
-                        });
-                        renderTable();
-                        renderChart();
-                        updateSummary();
-                    }
-                });
             } else {
                 document.getElementById('login-error').style.display = 'block';
-                console.log('Usuário ou senha incorretos');
             }
         }
 
@@ -278,8 +247,10 @@
         }
 
         function saveSalesData() {
+            const currentDate = new Date();
+            const month = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}`; // Formato YYYY-MM
             console.log('Salvando dados no Firebase:', salesData);
-            database.ref('salesData').set(salesData);
+            database.ref(`salesData/${month}`).set(salesData);
         }
 
         function updateSales() {
@@ -327,13 +298,13 @@
                 let statusClass = '';
                 if (data.sales > 0) {
                     status = data.sales >= data.target ? 'Meta Atingida' : 'Meta Não Atingida';
-                    statusClass = data.sales >= data.target ? 'status-atingida' : 'status-nao-atingida';
+                    statusClass = data.sales >= data.target ? 'text-success font-weight-bold' : 'text-danger font-weight-bold';
                 }
                 const highlightClass = (index + 1 === today) ? 'highlight' : '';
                 tableBody.innerHTML += `
                     <tr class="${highlightClass}">
                         <td>${index + 1} (${dayName})</td>
-                        <td ${currentUserRole === 'admin' ? 'contenteditable="true" onblur="updateTarget(this, ${index})"' : ''}>${formatCurrency(data.target)}</td>
+                        <td>${formatCurrency(data.target)}</td>
                         <td>${formatCurrency(data.sales)}</td>
                         <td class="${statusClass}">${status}</td>
                     </tr>
@@ -341,31 +312,15 @@
             });
         }
 
-        function updateTarget(element, index) {
-            const newTarget = parseFloat(element.innerText.replace(/[^\d,]/g, '').replace(',', '.'));
-            if (!isNaN(newTarget) && newTarget >= 0) {
-                salesData[index].target = newTarget;
-                saveSalesData();
-                updateSummary();
-                renderChart();
-            } else {
-                alert('Por favor, insira um valor de meta válido.');
-                element.innerText = formatCurrency(salesData[index].target);
-            }
-        }
-
         function renderChart() {
             const ctx = document.getElementById('salesChart').getContext('2d');
+            if (window.salesChart) {
+                window.salesChart.destroy();
+            }
             const labels = Array.from({ length: 30 }, (_, i) => `${i + 1} (${dayNames[new Date(2024, 5, i + 1).getDay()]})`);
             const sales = salesData.map(data => data.sales);
             const targets = salesData.map(data => data.target);
-
-            // Destroy the existing chart if it exists
-            if (salesChart) {
-                salesChart.destroy();
-            }
-
-            salesChart = new Chart(ctx, {
+            window.salesChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
@@ -387,26 +342,9 @@
                     ]
                 },
                 options: {
-                    plugins: {
-                        legend: {
-                            position: 'top'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return formatCurrency(context.raw);
-                                }
-                            }
-                        }
-                    },
                     scales: {
                         y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function (value) {
-                                    return formatCurrency(value);
-                                }
-                            }
+                            beginAtZero: true
                         }
                     }
                 }
@@ -426,14 +364,14 @@
         function checkLoginStatus() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             const loginTime = localStorage.getItem('loginTime');
-            const userRole = localStorage.getItem('userRole'); // Obtém o papel do usuário
+            const userRole = localStorage.getItem('userRole'); // Retrieve user role
             const currentTime = new Date().getTime();
             const sessionDuration = 5 * 60 * 1000; // 5 minutos em milissegundos
 
             if (isLoggedIn === 'true' && (currentTime - loginTime) < sessionDuration) {
+                currentUserRole = userRole;
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
-                currentUserRole = userRole; // Define o papel do usuário atual
                 loadSalesData();
                 renderTable();
                 renderChart();
@@ -441,31 +379,15 @@
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
-                localStorage.removeItem('userRole'); // Remove o papel do usuário
+                localStorage.removeItem('userRole'); // Remove user role
             }
         }
 
         function logout() {
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('loginTime');
-            localStorage.removeItem('userRole'); // Remove o papel do usuário
+            localStorage.removeItem('userRole'); // Remove user role
             location.reload();
-        }
-
-        function loadSalesData() {
-            database.ref('salesData').once('value').then((snapshot) => {
-                const data = snapshot.val();
-                console.log('Dados carregados do Firebase:', data);
-                if (data) {
-                    salesData.forEach((item, index) => {
-                        item.target = data[index].target;
-                        item.sales = data[index].sales;
-                    });
-                    renderTable();
-                    renderChart();
-                    updateSummary();
-                }
-            });
         }
 
         window.onload = checkLoginStatus;
