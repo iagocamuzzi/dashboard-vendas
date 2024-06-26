@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inserir Metas Diárias</title>
+    <title>Inserir Metas de Vendas Diárias</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -18,24 +18,26 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
         }
-        .form-container {
-            margin-top: 20px;
-        }
-        .btn-save {
-            margin-top: 20px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center">Inserir Metas Diárias - Junho</h1>
-        <div class="form-container">
-            <form id="targetsForm">
-                <!-- Form rows will be inserted here by JavaScript -->
-            </form>
-            <button class="btn btn-primary btn-save" onclick="saveTargets()">Salvar Metas</button>
-            <a href="index.html" class="btn btn-secondary">Voltar ao Dashboard</a>
+        <h1 class="text-center">Inserir Metas de Vendas Diárias</h1>
+        <div class="table-container">
+            <table class="table table-bordered table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Dia</th>
+                        <th>Meta (R$)</th>
+                    </tr>
+                </thead>
+                <tbody id="targetsTable">
+                    <!-- Table rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
         </div>
+        <button class="btn btn-primary btn-block" onclick="saveTargets()">Salvar Metas</button>
+        <a href="index.html" class="btn btn-info mt-3">Voltar ao Dashboard</a>
     </div>
 
     <!-- Firebase -->
@@ -45,89 +47,69 @@
     <script>
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBgUn5EBlVhbhYhyWjyrzfOAjadf9v6Pms",
-            authDomain: "dashboardcs-b46d8.firebaseapp.com",
-            projectId: "dashboardcs-b46d8",
-            storageBucket: "dashboardcs-b46d8.appspot.com",
-            messagingSenderId: "214815582221",
-            appId: "1:214815582221:web:842f78088a3e5b901c8d44",
-            databaseURL: "https://dashboardcs-b46d8-default-rtdb.firebaseio.com/"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            databaseURL: "YOUR_DATABASE_URL"
         };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const salesData = [
-            { target: 1611, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1345, sales: 0 },
-            { target: 1530, sales: 0 },
-            { target: 1423, sales: 0 },
-            { target: 1651, sales: 0 },
-            { target: 3244, sales: 0 },
-            { target: 3560, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1284, sales: 0 },
-            { target: 8581, sales: 0 },
-            { target: 32368, sales: 0 },
-            { target: 1705, sales: 0 },
-            { target: 1277, sales: 0 },
-            { target: 1730, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1361, sales: 0 },
-            { target: 1102, sales: 0 },
-            { target: 1377, sales: 0 },
-            { target: 1331, sales: 0 },
-            { target: 727, sales: 0 },
-            { target: 1760, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 776, sales: 0 },
-            { target: 834, sales: 0 },
-            { target: 687, sales: 0 },
-            { target: 780, sales: 0 },
-            { target: 1185, sales: 0 },
-            { target: 1472, sales: 0 },
-            { target: 0, sales: 0 }
-        ];
+        let salesData = [];
 
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-        function loadTargetsForm() {
-            const form = document.getElementById('targetsForm');
-            form.innerHTML = '';
+        function formatCurrency(value) {
+            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function loadSalesData() {
+            database.ref('salesData').once('value').then((snapshot) => {
+                const data = snapshot.val();
+                console.log('Dados carregados do Firebase:', data);
+                if (data) {
+                    salesData = data;
+                    renderTargetsTable();
+                }
+            });
+        }
+
+        function renderTargetsTable() {
+            const tableBody = document.getElementById('targetsTable');
+            tableBody.innerHTML = '';
             salesData.forEach((data, index) => {
                 const date = new Date(2024, 5, index + 1); // Junho de 2024
                 const dayName = dayNames[date.getDay()];
-                form.innerHTML += `
-                    <div class="form-group row">
-                        <label for="target-${index}" class="col-sm-2 col-form-label">${index + 1} (${dayName}):</label>
-                        <div class="col-sm-10">
-                            <input type="number" class="form-control" id="target-${index}" value="${data.target}">
-                        </div>
-                    </div>
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${index + 1} (${dayName})</td>
+                        <td><input type="number" class="form-control" value="${data.target}" onchange="updateTarget(${index}, this.value)"></td>
+                    </tr>
                 `;
             });
         }
 
+        function updateTarget(index, value) {
+            salesData[index].target = parseFloat(value);
+        }
+
         function saveTargets() {
-            salesData.forEach((data, index) => {
-                const targetInput = document.getElementById(`target-${index}`);
-                const newTarget = parseFloat(targetInput.value);
-                if (!isNaN(newTarget) && newTarget >= 0) {
-                    data.target = newTarget;
+            database.ref('salesData').set(salesData, (error) => {
+                if (error) {
+                    alert('Erro ao salvar dados: ' + error.message);
+                } else {
+                    alert('Metas salvas com sucesso!');
+                    window.location.href = 'index.html';
                 }
-            });
-            console.log('Salvando metas no Firebase:', salesData);
-            database.ref('salesData').set(salesData).then(() => {
-                alert('Metas salvas com sucesso!');
-                window.location.href = 'index.html';
-            }).catch((error) => {
-                console.error('Erro ao salvar metas:', error);
             });
         }
 
-        window.onload = loadTargetsForm;
+        window.onload = loadSalesData;
     </script>
 </body>
 </html>
