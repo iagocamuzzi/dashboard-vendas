@@ -48,7 +48,7 @@
             margin: 20px 0;
             display: flex;
             justify-content: space-around;
-            text-align: center.
+            text-align: center;
         }
         .summary .card {
             flex: 1;
@@ -132,7 +132,6 @@
                 </div>
                 <button class="btn btn-primary" onclick="updateSales()">Atualizar</button>
                 <button class="btn btn-success ml-2" onclick="sendWhatsAppMessage()">Enviar WhatsApp</button>
-                <button class="btn btn-secondary ml-2" id="insert-targets-btn" style="display:none;" onclick="window.location.href='inserir_metas.html'">Inserir Metas</button>
             </div>
         </div>
         <div class="table-container">
@@ -155,6 +154,7 @@
             <canvas id="salesChart" width="600" height="300"></canvas>
         </div>
         <button class="btn btn-danger" onclick="logout()">Logout</button>
+        <button class="btn btn-info mt-3" id="insert-targets-btn" style="display: none;" onclick="window.location.href='inserir_metas.html'">Inserir Metas</button>
     </div>
 
     <!-- Biblioteca Chart.js -->
@@ -167,13 +167,13 @@
     <script>
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBgUn5EBlVhbhYhyWjyrzfOAjadf9v6Pms",
-            authDomain: "dashboardcs-b46d8.firebaseapp.com",
-            projectId: "dashboardcs-b46d8",
-            storageBucket: "dashboardcs-b46d8.appspot.com",
-            messagingSenderId: "214815582221",
-            appId: "1:214815582221:web:842f78088a3e5b901c8d44",
-            databaseURL: "https://dashboardcs-b46d8-default-rtdb.firebaseio.com/"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            databaseURL: "YOUR_DATABASE_URL"
         };
 
         // Initialize Firebase
@@ -214,7 +214,7 @@
                 updateSummary();
                 // Exibe o botão "Inserir Metas" apenas para o admin
                 if (currentUserRole === 'admin') {
-                    document.getElementById('insert-targets-btn').style.display = 'inline-block';
+                    document.getElementById('insert-targets-btn').style.display = 'block';
                 }
                 // Listen for changes in Firebase Realtime Database
                 database.ref('salesData').on('value', (snapshot) => {
@@ -429,6 +429,10 @@
                 renderTable();
                 renderChart();
                 updateSummary();
+                // Exibe o botão "Inserir Metas" apenas para o admin
+                if (currentUserRole === 'admin') {
+                    document.getElementById('insert-targets-btn').style.display = 'block';
+                }
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
