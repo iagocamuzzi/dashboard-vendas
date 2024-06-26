@@ -332,25 +332,12 @@
                 tableBody.innerHTML += `
                     <tr class="${highlightClass}">
                         <td>${index + 1} (${dayName})</td>
-                        <td ${currentUserRole === 'admin' ? 'contenteditable="true" onblur="updateTarget(this, ${index})"' : ''}>${formatCurrency(data.target)}</td>
+                        <td>${formatCurrency(data.target)}</td>
                         <td>${formatCurrency(data.sales)}</td>
                         <td class="${statusClass}">${status}</td>
                     </tr>
                 `;
             });
-        }
-
-        function updateTarget(element, index) {
-            const newTarget = parseFloat(element.innerText.replace(/[^\d,]/g, '').replace(',', '.'));
-            if (!isNaN(newTarget) && newTarget >= 0) {
-                salesData[index].target = newTarget;
-                saveSalesData();
-                updateSummary();
-                renderChart();
-            } else {
-                alert('Por favor, insira um valor de meta válido.');
-                element.innerText = formatCurrency(salesData[index].target);
-            }
         }
 
         function renderChart() {
