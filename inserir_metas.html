@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inserir Metas - Junho</title>
+    <title>Editar Metas - Julho</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -21,14 +21,11 @@
         .table-container {
             margin-top: 20px;
         }
-        .form-group {
-            margin-bottom: 1rem;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center">Inserir Metas - Junho</h1>
+        <h1 class="text-center">Editar Metas - Julho</h1>
         <div class="table-container">
             <table class="table table-bordered table-striped">
                 <thead class="thead-dark">
@@ -37,12 +34,12 @@
                         <th>Meta (R$)</th>
                     </tr>
                 </thead>
-                <tbody id="targetsTable">
+                <tbody id="metasTable">
                     <!-- Table rows will be inserted here by JavaScript -->
                 </tbody>
             </table>
         </div>
-        <button class="btn btn-primary" onclick="saveTargets()">Salvar Metas</button>
+        <button class="btn btn-primary mt-3" onclick="saveNewMetas()">Salvar</button>
         <a href="index.html" class="btn btn-info mt-3">Voltar ao Dashboard</a>
     </div>
 
@@ -66,52 +63,60 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const salesData = [];
+        const salesData = Array.from({ length: 31 }, (_, i) => ({ target: 0, sales: 0 }));
 
         function formatCurrency(value) {
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        function loadTargetsData() {
-            database.ref('salesData').once('value').then((snapshot) => {
-                const data = snapshot.val();
-                console.log('Dados carregados do Firebase:', data);
-                if (data) {
-                    salesData.length = 0; // Clear the array
-                    data.forEach((item) => {
-                        salesData.push(item);
-                    });
-                    renderTargetsTable();
-                }
-            });
-        }
-
-        function renderTargetsTable() {
-            const tableBody = document.getElementById('targetsTable');
+        function renderMetasTable() {
+            const tableBody = document.getElementById('metasTable');
             tableBody.innerHTML = '';
             salesData.forEach((data, index) => {
                 tableBody.innerHTML += `
                     <tr>
                         <td>${index + 1}</td>
-                        <td><input type="number" class="form-control" value="${data.target}" onchange="updateTarget(${index}, this.value)"></td>
+                        <td><input type="number" class="form-control" value="${data.target}" oninput="updateTarget(${index}, this.value)"></td>
                     </tr>
                 `;
             });
         }
 
         function updateTarget(index, value) {
-            salesData[index].target = parseFloat(value);
+            const newTarget = parseFloat(value);
+            if (!isNaN(newTarget) && newTarget >= 0) {
+                salesData[index].target = newTarget;
+            } else {
+                alert('Por favor, insira um valor de meta válido.');
+            }
         }
 
-        function saveTargets() {
-            console.log('Salvando metas no Firebase:', salesData);
+        function saveNewMetas() {
+            console.log('Salvando novas metas no Firebase:', salesData);
             database.ref('salesData').set(salesData).then(() => {
                 alert('Metas salvas com sucesso!');
                 window.location.href = 'index.html';
+            }).catch((error) => {
+                console.error('Erro ao salvar metas:', error);
+                alert('Erro ao salvar metas. Por favor, tente novamente.');
             });
         }
 
-        window.onload = loadTargetsData;
+        function loadMetasData() {
+            database.ref('salesData').once('value').then((snapshot) => {
+                const data = snapshot.val();
+                console.log('Dados carregados do Firebase:', data);
+                if (data) {
+                    data.forEach((item, index) => {
+                        salesData[index].target = item.target;
+                        salesData[index].sales = item.sales;
+                    });
+                    renderMetasTable();
+                }
+            });
+        }
+
+        window.onload = loadMetasData;
     </script>
 </body>
 </html>
