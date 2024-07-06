@@ -119,6 +119,10 @@
                 <h5>Percentual de Atingimento</h5>
                 <p id="achievementRate">0%</p>
             </div>
+            <div class="card">
+                <h5>Meta Semanal</h5>
+                <p id="weeklyTarget">R$ 0,00</p>
+            </div>
         </div>
         <div class="form-container text-center">
             <div class="form-group row justify-content-center">
@@ -132,6 +136,7 @@
                 </div>
                 <button class="btn btn-primary" onclick="updateSales()">Atualizar</button>
                 <button class="btn btn-success ml-2" onclick="sendWhatsAppMessage()">Enviar WhatsApp</button>
+                <a href="editar-metas.html" class="btn btn-info ml-2">Editar Metas</a>
             </div>
         </div>
         <div class="table-container">
@@ -154,7 +159,6 @@
             <canvas id="salesChart" width="600" height="300"></canvas>
         </div>
         <button class="btn btn-danger" onclick="logout()">Logout</button>
-        <button id="editMetasBtn" class="btn btn-info mt-3" style="display: none;" onclick="location.href='editar-metas.html'">Editar Metas</button>
     </div>
 
     <!-- Biblioteca Chart.js -->
@@ -208,9 +212,6 @@
                 localStorage.setItem('userRole', user.role); // Armazena o papel do usuário
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
-                if (currentUserRole === 'admin') {
-                    document.getElementById('editMetasBtn').style.display = 'block';
-                }
                 loadSalesData();
                 renderTable();
                 renderChart();
@@ -241,7 +242,38 @@
             }
         }
 
-        const salesData = Array.from({ length: 31 }, (_, i) => ({ target: 0, sales: 0 }));
+        const salesData = [
+            { target: 1611, sales: 0 },
+            { target: 0, sales: 0 },
+            { target: 1345, sales: 0 },
+            { target: 1530, sales: 0 },
+            { target: 1423, sales: 0 },
+            { target: 1651, sales: 0 },
+            { target: 3244, sales: 0 },
+            { target: 3560, sales: 0 },
+            { target: 0, sales: 0 },
+            { target: 1284, sales: 0 },
+            { target: 8581, sales: 0 },
+            { target: 32368, sales: 0 },
+            { target: 1705, sales: 0 },
+            { target: 1277, sales: 0 },
+            { target: 1730, sales: 0 },
+            { target: 0, sales: 0 },
+            { target: 1361, sales: 0 },
+            { target: 1102, sales: 0 },
+            { target: 1377, sales: 0 },
+            { target: 1331, sales: 0 },
+            { target: 727, sales: 0 },
+            { target: 1760, sales: 0 },
+            { target: 0, sales: 0 },
+            { target: 776, sales: 0 },
+            { target: 834, sales: 0 },
+            { target: 687, sales: 0 },
+            { target: 780, sales: 0 },
+            { target: 1185, sales: 0 },
+            { target: 1472, sales: 0 },
+            { target: 0, sales: 0 }
+        ];
 
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -279,7 +311,7 @@
                 const sales = salesData[lastUpdatedDay - 1].sales;
                 const status = sales >= target ? 'Meta Atingida 🎉' : 'Meta Não Atingida ❌';
                 const message = `📅 Dia: ${lastUpdatedDay}\n🎯 Meta: ${formatCurrency(target)}\n💰 Vendas Realizadas: ${formatCurrency(sales)}\n📊 Status: ${status}`;
-                const phoneNumber = '5527997635942';  // Número de telefone do destinatário no formato internacional
+                const phoneNumber = '5527981829452';  // Número de telefone do destinatário no formato internacional
                 const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
 
                 window.open(whatsappUrl, '_blank');
@@ -377,9 +409,31 @@
             const totalSales = salesData.reduce((sum, data) => sum + data.sales, 0);
             const achievementRate = (totalSales / totalTarget) * 100;
 
+            const weeklyTarget = calculateWeeklyTarget();
+
             document.getElementById('totalTarget').innerText = formatCurrency(totalTarget);
             document.getElementById('totalSales').innerText = formatCurrency(totalSales);
             document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
+            document.getElementById('weeklyTarget').innerText = formatCurrency(weeklyTarget);
+        }
+
+        function calculateWeeklyTarget() {
+            const today = new Date();
+            const currentDay = today.getDay();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - currentDay + 1); // Monday
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
+
+            let weeklyTarget = 0;
+            salesData.forEach((data, index) => {
+                const date = new Date(2024, 6, index + 1); // Julho de 2024
+                if (date >= startOfWeek && date <= endOfWeek) {
+                    weeklyTarget += data.target;
+                }
+            });
+
+            return weeklyTarget;
         }
 
         function checkLoginStatus() {
@@ -393,9 +447,6 @@
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
                 currentUserRole = userRole; // Define o papel do usuário atual
-                if (currentUserRole === 'admin') {
-                    document.getElementById('editMetasBtn').style.display = 'block';
-                }
                 loadSalesData();
                 renderTable();
                 renderChart();
