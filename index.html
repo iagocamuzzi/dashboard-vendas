@@ -64,7 +64,7 @@
         }
         .summary .card p {
             font-size: 1.2em;
-            margin: 0.
+            margin: 0;
         }
         /* Remove arrows from input number fields */
         input[type=number]::-webkit-outer-spin-button,
@@ -122,6 +122,8 @@
             <div class="card">
                 <h5>Meta Semanal</h5>
                 <p id="weeklyTarget">R$ 0,00</p>
+                <h5>Vendido na Semana</h5>
+                <p id="weeklySales">R$ 0,00</p>
             </div>
         </div>
         <div class="form-container text-center">
@@ -136,6 +138,7 @@
                 </div>
                 <button class="btn btn-primary" onclick="updateSales()">Atualizar</button>
                 <button class="btn btn-success ml-2" onclick="sendWhatsAppMessage()">Enviar WhatsApp</button>
+                <button class="btn btn-warning ml-2" onclick="window.location.href='editar_metas.html'">Editar Metas</button>
             </div>
         </div>
         <div class="table-container">
@@ -345,20 +348,27 @@
         }
 
         function calculateWeeklyTarget() {
-            const today = new Date();
-            const currentDay = today.getDay();
-            const currentDate = today.getDate();
-            const startOfWeek = currentDate - currentDay + (currentDay === 0 ? -6 : 1); // Ajusta para segunda-feira
-            const endOfWeek = startOfWeek + 6; // Domingo
+            const currentDate = new Date();
+            const currentWeekDay = currentDate.getDay(); // 0 (Domingo) a 6 (Sábado)
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentWeekDay + 1); // Começa na segunda-feira
+
+            const endOfWeek = new Date(currentDate);
+            endOfWeek.setDate(currentDate.getDate() - currentWeekDay + 7); // Termina no domingo
 
             let weeklyTarget = 0;
-            for (let i = startOfWeek; i <= endOfWeek; i++) {
-                if (i >= 1 && i <= 30) {
-                    weeklyTarget += salesData[i - 1].target;
-                }
-            }
+            let weeklySales = 0;
 
-            return weeklyTarget;
+            salesData.forEach((data, index) => {
+                const date = new Date(2024, 5, index + 1);
+                if (date >= startOfWeek && date <= endOfWeek) {
+                    weeklyTarget += data.target;
+                    weeklySales += data.sales;
+                }
+            });
+
+            document.getElementById('weeklyTarget').innerText = formatCurrency(weeklyTarget);
+            document.getElementById('weeklySales').innerText = formatCurrency(weeklySales);
         }
 
         function renderChart() {
@@ -424,12 +434,10 @@
             const totalTarget = salesData.reduce((sum, data) => sum + data.target, 0);
             const totalSales = salesData.reduce((sum, data) => sum + data.sales, 0);
             const achievementRate = (totalSales / totalTarget) * 100;
-            const weeklyTarget = calculateWeeklyTarget();
 
             document.getElementById('totalTarget').innerText = formatCurrency(totalTarget);
             document.getElementById('totalSales').innerText = formatCurrency(totalSales);
             document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
-            document.getElementById('weeklyTarget').innerText = formatCurrency(weeklyTarget);
         }
 
         function checkLoginStatus() {
@@ -447,6 +455,7 @@
                 renderTable();
                 renderChart();
                 updateSummary();
+                calculateWeeklyTarget(); // Adiciona esta linha para calcular a meta semanal
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
@@ -473,6 +482,7 @@
                     renderTable();
                     renderChart();
                     updateSummary();
+                    calculateWeeklyTarget(); // Adiciona esta linha para calcular a meta semanal
                 }
             });
         }
