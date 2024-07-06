@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Metas de Vendas Diárias - Junho</title>
+    <title>Dashboard de Metas de Vendas Diárias - Julho</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -104,33 +104,29 @@
     <div class="container" id="dashboard-container" style="display: none;">
         <div class="header text-center">
             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png" alt="Logomarca Cacau Show" class="logo">
-            <h1>Dashboard de Metas de Vendas Diárias - Junho</h1>
+            <h1>Dashboard de Metas de Vendas Diárias - Julho</h1>
         </div>
         <div class="summary">
             <div class="card">
-                <h5>Total Meta do Mês</h5>
-                <p id="totalTarget">R$ 0,00</p>
-            </div>
-            <div class="card">
-                <h5>Total Vendas Realizadas</h5>
-                <p id="totalSales">R$ 0,00</p>
+                <h5>Total Meta do Mês e Vendas Realizadas</h5>
+                <p id="totalTarget">Meta: R$ 0,00</p>
+                <p id="totalSales">Vendas: R$ 0,00</p>
             </div>
             <div class="card">
                 <h5>Percentual de Atingimento</h5>
                 <p id="achievementRate">0%</p>
             </div>
             <div class="card">
-                <h5>Meta Semanal</h5>
-                <p id="weeklyTarget">R$ 0,00</p>
-                <h5>Vendido na Semana</h5>
-                <p id="weeklySales">R$ 0,00</p>
+                <h5>Meta Semanal e Vendas Realizadas na Semana</h5>
+                <p id="weeklyTarget">Meta: R$ 0,00</p>
+                <p id="weeklySales">Vendas: R$ 0,00</p>
             </div>
         </div>
         <div class="form-container text-center">
             <div class="form-group row justify-content-center">
                 <label for="day" class="col-form-label">Dia:</label>
                 <div class="col-sm-2">
-                    <input type="number" class="form-control" id="day" min="1" max="30" autocomplete="off">
+                    <input type="number" class="form-control" id="day" min="1" max="31" autocomplete="off">
                 </div>
                 <label for="sales" class="col-form-label">Vendas Realizadas (R$):</label>
                 <div class="col-sm-2">
@@ -138,7 +134,7 @@
                 </div>
                 <button class="btn btn-primary" onclick="updateSales()">Atualizar</button>
                 <button class="btn btn-success ml-2" onclick="sendWhatsAppMessage()">Enviar WhatsApp</button>
-                <button class="btn btn-warning ml-2" onclick="window.location.href='editar_metas.html'">Editar Metas</button>
+                <button class="btn btn-secondary ml-2" id="editTargetsButton" style="display:none;" onclick="window.location.href='editar_metas.html'">Editar Metas</button>
             </div>
         </div>
         <div class="table-container">
@@ -214,24 +210,13 @@
                 localStorage.setItem('userRole', user.role); // Armazena o papel do usuário
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
+                if (currentUserRole === 'admin') {
+                    document.getElementById('editTargetsButton').style.display = 'inline-block';
+                }
                 loadSalesData();
                 renderTable();
                 renderChart();
                 updateSummary();
-                // Listen for changes in Firebase Realtime Database
-                database.ref('salesData').on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    console.log('Dados recebidos do Firebase em tempo real:', data);
-                    if (data) {
-                        salesData.forEach((item, index) => {
-                            item.target = data[index].target;
-                            item.sales = data[index].sales;
-                        });
-                        renderTable();
-                        renderChart();
-                        updateSummary();
-                    }
-                });
             } else {
                 document.getElementById('login-error').style.display = 'block';
                 console.log('Usuário ou senha incorretos');
@@ -244,38 +229,7 @@
             }
         }
 
-        const salesData = [
-            { target: 1611, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1345, sales: 0 },
-            { target: 1530, sales: 0 },
-            { target: 1423, sales: 0 },
-            { target: 1651, sales: 0 },
-            { target: 3244, sales: 0 },
-            { target: 3560, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1284, sales: 0 },
-            { target: 8581, sales: 0 },
-            { target: 32368, sales: 0 },
-            { target: 1705, sales: 0 },
-            { target: 1277, sales: 0 },
-            { target: 1730, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1361, sales: 0 },
-            { target: 1102, sales: 0 },
-            { target: 1377, sales: 0 },
-            { target: 1331, sales: 0 },
-            { target: 727, sales: 0 },
-            { target: 1760, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 776, sales: 0 },
-            { target: 834, sales: 0 },
-            { target: 687, sales: 0 },
-            { target: 780, sales: 0 },
-            { target: 1185, sales: 0 },
-            { target: 1472, sales: 0 },
-            { target: 0, sales: 0 }
-        ];
+        const salesData = [];
 
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -292,13 +246,14 @@
             const day = parseInt(document.getElementById('day').value);
             const sales = parseFloat(document.getElementById('sales').value);
 
-            if (day >= 1 && day <= 30 && !isNaN(sales) && sales >= 0) {
+            if (day >= 1 && day <= 31 && !isNaN(sales) && sales >= 0) {
                 salesData[day - 1].sales = sales;
                 lastUpdatedDay = day;
                 saveSalesData();
                 renderTable();
                 renderChart();
                 updateSummary();
+                calculateWeeklyTarget();
                 // Limpar os campos de entrada
                 document.getElementById('day').value = '';
                 document.getElementById('sales').value = '';
@@ -327,7 +282,7 @@
             tableBody.innerHTML = '';
             const today = new Date().getDate();
             salesData.forEach((data, index) => {
-                const date = new Date(2024, 5, index + 1); // Junho de 2024
+                const date = new Date(2024, 6, index + 1); // Julho de 2024
                 const dayName = dayNames[date.getDay()];
                 let status = '';
                 let statusClass = '';
@@ -347,33 +302,9 @@
             });
         }
 
-        function calculateWeeklyTarget() {
-            const currentDate = new Date();
-            const currentWeekDay = currentDate.getDay(); // 0 (Domingo) a 6 (Sábado)
-            const startOfWeek = new Date(currentDate);
-            startOfWeek.setDate(currentDate.getDate() - currentWeekDay + 1); // Começa na segunda-feira
-
-            const endOfWeek = new Date(currentDate);
-            endOfWeek.setDate(currentDate.getDate() - currentWeekDay + 7); // Termina no domingo
-
-            let weeklyTarget = 0;
-            let weeklySales = 0;
-
-            salesData.forEach((data, index) => {
-                const date = new Date(2024, 5, index + 1);
-                if (date >= startOfWeek && date <= endOfWeek) {
-                    weeklyTarget += data.target;
-                    weeklySales += data.sales;
-                }
-            });
-
-            document.getElementById('weeklyTarget').innerText = formatCurrency(weeklyTarget);
-            document.getElementById('weeklySales').innerText = formatCurrency(weeklySales);
-        }
-
         function renderChart() {
             const ctx = document.getElementById('salesChart').getContext('2d');
-            const labels = Array.from({ length: 30 }, (_, i) => `${i + 1} (${dayNames[new Date(2024, 5, i + 1).getDay()]})`);
+            const labels = Array.from({ length: 31 }, (_, i) => `${i + 1} (${dayNames[new Date(2024, 6, i + 1).getDay()]})`);
             const sales = salesData.map(data => data.sales);
             const targets = salesData.map(data => data.target);
 
@@ -435,9 +366,30 @@
             const totalSales = salesData.reduce((sum, data) => sum + data.sales, 0);
             const achievementRate = (totalSales / totalTarget) * 100;
 
-            document.getElementById('totalTarget').innerText = formatCurrency(totalTarget);
-            document.getElementById('totalSales').innerText = formatCurrency(totalSales);
+            document.getElementById('totalTarget').innerText = `Meta: ${formatCurrency(totalTarget)}`;
+            document.getElementById('totalSales').innerText = `Vendas: ${formatCurrency(totalSales)}`;
             document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
+        }
+
+        function calculateWeeklyTarget() {
+            const currentDate = new Date();
+            const currentDay = currentDate.getDate();
+            const currentWeekDay = currentDate.getDay(); // 0 (Domingo) a 6 (Sábado)
+            const startOfWeek = currentDay - currentWeekDay; // Início da semana (Domingo)
+            const endOfWeek = startOfWeek + 6; // Fim da semana (Sábado)
+
+            let weeklyTarget = 0;
+            let weeklySales = 0;
+
+            for (let i = startOfWeek; i <= endOfWeek; i++) {
+                if (i >= 1 && i <= 31) { // Garante que os dias estão dentro do mês
+                    weeklyTarget += salesData[i - 1].target || 0;
+                    weeklySales += salesData[i - 1].sales || 0;
+                }
+            }
+
+            document.getElementById('weeklyTarget').innerText = `Meta: ${formatCurrency(weeklyTarget)}`;
+            document.getElementById('weeklySales').innerText = `Vendas: ${formatCurrency(weeklySales)}`;
         }
 
         function checkLoginStatus() {
@@ -451,11 +403,14 @@
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
                 currentUserRole = userRole; // Define o papel do usuário atual
+                if (currentUserRole === 'admin') {
+                    document.getElementById('editTargetsButton').style.display = 'inline-block';
+                }
                 loadSalesData();
                 renderTable();
                 renderChart();
                 updateSummary();
-                calculateWeeklyTarget(); // Adiciona esta linha para calcular a meta semanal
+                calculateWeeklyTarget();
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
@@ -475,14 +430,14 @@
                 const data = snapshot.val();
                 console.log('Dados carregados do Firebase:', data);
                 if (data) {
-                    salesData.forEach((item, index) => {
-                        item.target = data[index].target;
-                        item.sales = data[index].sales;
+                    salesData.length = 0; // Clear current salesData array
+                    data.forEach((item, index) => {
+                        salesData.push(item);
                     });
                     renderTable();
                     renderChart();
                     updateSummary();
-                    calculateWeeklyTarget(); // Adiciona esta linha para calcular a meta semanal
+                    calculateWeeklyTarget();
                 }
             });
         }
@@ -494,6 +449,7 @@
         renderTable();
         renderChart();
         updateSummary();
+        calculateWeeklyTarget();
     </script>
 </body>
 </html>
