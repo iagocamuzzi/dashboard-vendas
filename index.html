@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Metas de Vendas Diárias - Julho</title>
+    <title>Dashboard de Metas de Vendas Diárias - Junho</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -66,6 +66,15 @@
             font-size: 1.2em;
             margin: 0;
         }
+        /* Remove arrows from input number fields */
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
         .status-atingida {
             font-weight: bold;
             color: green;
@@ -95,22 +104,21 @@
     <div class="container" id="dashboard-container" style="display: none;">
         <div class="header text-center">
             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png" alt="Logomarca Cacau Show" class="logo">
-            <h1>Dashboard de Metas de Vendas Diárias - Julho</h1>
+            <h1>Dashboard de Metas de Vendas Diárias - Junho</h1>
         </div>
         <div class="summary">
             <div class="card">
                 <h5>Mês</h5>
-                <p id="totalTarget">Meta: R$ 0,00</p>
-                <p id="totalSales">Vendas: R$ 0,00</p>
-            </div>
-            <div class="card" id="weeklySummaryCard">
-                <h5>Semana</h5>
-                <p id="weeklyTarget">Meta: R$ 0,00</p>
-                <p id="weeklySales">Vendas: R$ 0,00</p>
+                <p id="totalTarget">R$ 0,00</p>
             </div>
             <div class="card">
-                <h5>Percentual de Atingimento</h5>
-                <p id="achievementRate">0%</p>
+                <h5>Total Vendas Realizadas</h5>
+                <p id="totalSales">R$ 0,00</p>
+            </div>
+            <div class="card" id="weeklySummary">
+                <h5>Semana</h5>
+                <p id="weeklyTarget">Meta: R$ 0,00</p>
+                <p id="weeklySales">Vendido: R$ 0,00</p>
             </div>
         </div>
         <div class="form-container text-center">
@@ -147,7 +155,7 @@
             <canvas id="salesChart" width="600" height="300"></canvas>
         </div>
         <button class="btn btn-danger" onclick="logout()">Logout</button>
-        <button id="editTargetsButton" class="btn btn-info" onclick="window.location.href='edit-targets.html'" style="display: none;">Editar Metas</button>
+        <button class="btn btn-info mt-3" onclick="openEditTargetsPage()">Editar Metas</button>
     </div>
 
     <!-- Biblioteca Chart.js -->
@@ -156,6 +164,8 @@
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" />
 
     <script>
         // Your web app's Firebase configuration
@@ -201,15 +211,25 @@
                 localStorage.setItem('userRole', user.role); // Armazena o papel do usuário
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
-                if (currentUserRole === 'admin') {
-                    document.getElementById('editTargetsButton').style.display = 'inline-block';
-                }
                 loadSalesData();
                 renderTable();
                 renderChart();
                 updateSummary();
-                calculateWeeklyTarget();
-                calculateWeeklySales();
+                // Listen for changes in Firebase Realtime Database
+                database.ref('salesData').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    console.log('Dados recebidos do Firebase em tempo real:', data);
+                    if (data) {
+                        salesData.forEach((item, index) => {
+                            item.target = data[index].target;
+                            item.sales = data[index].sales;
+                        });
+                        renderTable();
+                        renderChart();
+                        updateSummary();
+                        checkForNotifications();
+                    }
+                });
             } else {
                 document.getElementById('login-error').style.display = 'block';
                 console.log('Usuário ou senha incorretos');
@@ -277,8 +297,6 @@
                 renderTable();
                 renderChart();
                 updateSummary();
-                calculateWeeklyTarget();
-                calculateWeeklySales();
                 // Limpar os campos de entrada
                 document.getElementById('day').value = '';
                 document.getElementById('sales').value = '';
@@ -293,7 +311,7 @@
                 const sales = salesData[lastUpdatedDay - 1].sales;
                 const status = sales >= target ? 'Meta Atingida 🎉' : 'Meta Não Atingida ❌';
                 const message = `📅 Dia: ${lastUpdatedDay}\n🎯 Meta: ${formatCurrency(target)}\n💰 Vendas Realizadas: ${formatCurrency(sales)}\n📊 Status: ${status}`;
-                const phoneNumber = '5527997635942';  // Número de telefone do destinatário no formato internacional
+                const phoneNumber = '5527981829452';  // Número de telefone do destinatário no formato internacional
                 const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
 
                 window.open(whatsappUrl, '_blank');
@@ -391,49 +409,33 @@
             const totalSales = salesData.reduce((sum, data) => sum + data.sales, 0);
             const achievementRate = (totalSales / totalTarget) * 100;
 
-            document.getElementById('totalTarget').innerText = `Meta: ${formatCurrency(totalTarget)}`;
-            document.getElementById('totalSales').innerText = `Vendas: ${formatCurrency(totalSales)}`;
+            document.getElementById('totalTarget').innerText = formatCurrency(totalTarget);
+            document.getElementById('totalSales').innerText = formatCurrency(totalSales);
             document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
-        }
 
-        function calculateWeeklyTarget() {
-            const today = new Date();
-            const dayOfWeek = today.getDay();
-            const startOfWeek = today.getDate() - dayOfWeek;
-            const endOfWeek = startOfWeek + 6;
-
-            let weeklyTarget = 0;
-            for (let i = startOfWeek; i <= endOfWeek; i++) {
-                if (i >= 1 && i <= 31) {
-                    weeklyTarget += salesData[i - 1].target;
-                }
-            }
-
+            const currentWeek = getCurrentWeekRange();
+            const weeklyTarget = calculateWeeklyTotal('target', currentWeek);
+            const weeklySales = calculateWeeklyTotal('sales', currentWeek);
             document.getElementById('weeklyTarget').innerText = `Meta: ${formatCurrency(weeklyTarget)}`;
-        }
+            document.getElementById('weeklySales').innerText = `Vendido: ${formatCurrency(weeklySales)}`;
 
-        function calculateWeeklySales() {
-            const today = new Date();
-            const dayOfWeek = today.getDay();
-            const startOfWeek = today.getDate() - dayOfWeek;
-            const endOfWeek = startOfWeek + 6;
-
-            let weeklySales = 0;
-            for (let i = startOfWeek; i <= endOfWeek; i++) {
-                if (i >= 1 && i <= 31) {
-                    weeklySales += salesData[i - 1].sales;
-                }
-            }
-
-            const weeklyTarget = parseFloat(document.getElementById('weeklyTarget').innerText.replace(/[^\d,]/g, '').replace(',', '.'));
-            document.getElementById('weeklySales').innerText = `Vendas: ${formatCurrency(weeklySales)}`;
-
-            const weeklySummaryCard = document.getElementById('weeklySummaryCard');
+            const weeklySummaryCard = document.getElementById('weeklySummary');
             if (weeklySales >= weeklyTarget) {
                 weeklySummaryCard.style.backgroundColor = 'green';
             } else {
                 weeklySummaryCard.style.backgroundColor = '#007bff';
             }
+        }
+
+        function calculateWeeklyTotal(type, weekRange) {
+            return salesData.slice(weekRange.start, weekRange.end + 1).reduce((sum, data) => sum + data[type], 0);
+        }
+
+        function getCurrentWeekRange() {
+            const today = new Date();
+            const start = today.getDate() - today.getDay(); // Get the start of the week (Sunday)
+            const end = start + 6; // Get the end of the week (Saturday)
+            return { start: start - 1, end: end - 1 }; // Adjust for zero-based index
         }
 
         function checkLoginStatus() {
@@ -447,15 +449,10 @@
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
                 currentUserRole = userRole; // Define o papel do usuário atual
-                if (currentUserRole === 'admin') {
-                    document.getElementById('editTargetsButton').style.display = 'inline-block';
-                }
                 loadSalesData();
                 renderTable();
                 renderChart();
                 updateSummary();
-                calculateWeeklyTarget();
-                calculateWeeklySales();
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
@@ -482,10 +479,21 @@
                     renderTable();
                     renderChart();
                     updateSummary();
-                    calculateWeeklyTarget();
-                    calculateWeeklySales();
+                    checkForNotifications();
                 }
             });
+        }
+
+        function checkForNotifications() {
+            salesData.forEach((data, index) => {
+                if (data.sales > 1.5 * data.target) {
+                    toastr.success(`Vendas do dia ${index + 1} (${dayNames[new Date(2024, 6, index + 1).getDay()]}) atingiram mais de 150% da meta!`);
+                }
+            });
+        }
+
+        function openEditTargetsPage() {
+            window.location.href = 'edit-targets.html';
         }
 
         window.onload = checkLoginStatus;
@@ -495,8 +503,6 @@
         renderTable();
         renderChart();
         updateSummary();
-        calculateWeeklyTarget();
-        calculateWeeklySales();
     </script>
 </body>
 </html>
