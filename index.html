@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Metas de Vendas Diárias - Julho</title>
+    <title>Dashboard de Metas de Vendas Diárias - Junho</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -64,7 +64,7 @@
         }
         .summary .card p {
             font-size: 1.2em;
-            margin: 0;
+            margin: 0.
         }
         /* Remove arrows from input number fields */
         input[type=number]::-webkit-outer-spin-button,
@@ -104,7 +104,7 @@
     <div class="container" id="dashboard-container" style="display: none;">
         <div class="header text-center">
             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png" alt="Logomarca Cacau Show" class="logo">
-            <h1>Dashboard de Metas de Vendas Diárias - Julho</h1>
+            <h1>Dashboard de Metas de Vendas Diárias - Junho</h1>
         </div>
         <div class="summary">
             <div class="card">
@@ -128,7 +128,7 @@
             <div class="form-group row justify-content-center">
                 <label for="day" class="col-form-label">Dia:</label>
                 <div class="col-sm-2">
-                    <input type="number" class="form-control" id="day" min="1" max="31" autocomplete="off">
+                    <input type="number" class="form-control" id="day" min="1" max="30" autocomplete="off">
                 </div>
                 <label for="sales" class="col-form-label">Vendas Realizadas (R$):</label>
                 <div class="col-sm-2">
@@ -136,7 +136,6 @@
                 </div>
                 <button class="btn btn-primary" onclick="updateSales()">Atualizar</button>
                 <button class="btn btn-success ml-2" onclick="sendWhatsAppMessage()">Enviar WhatsApp</button>
-                <a href="editar-metas.html" class="btn btn-info ml-2">Editar Metas</a>
             </div>
         </div>
         <div class="table-container">
@@ -290,7 +289,7 @@
             const day = parseInt(document.getElementById('day').value);
             const sales = parseFloat(document.getElementById('sales').value);
 
-            if (day >= 1 && day <= 31 && !isNaN(sales) && sales >= 0) {
+            if (day >= 1 && day <= 30 && !isNaN(sales) && sales >= 0) {
                 salesData[day - 1].sales = sales;
                 lastUpdatedDay = day;
                 saveSalesData();
@@ -325,7 +324,7 @@
             tableBody.innerHTML = '';
             const today = new Date().getDate();
             salesData.forEach((data, index) => {
-                const date = new Date(2024, 6, index + 1); // Julho de 2024
+                const date = new Date(2024, 5, index + 1); // Junho de 2024
                 const dayName = dayNames[date.getDay()];
                 let status = '';
                 let statusClass = '';
@@ -345,9 +344,26 @@
             });
         }
 
+        function calculateWeeklyTarget() {
+            const today = new Date();
+            const currentDay = today.getDay();
+            const currentDate = today.getDate();
+            const startOfWeek = currentDate - currentDay + (currentDay === 0 ? -6 : 1); // Ajusta para segunda-feira
+            const endOfWeek = startOfWeek + 6; // Domingo
+
+            let weeklyTarget = 0;
+            for (let i = startOfWeek; i <= endOfWeek; i++) {
+                if (i >= 1 && i <= 30) {
+                    weeklyTarget += salesData[i - 1].target;
+                }
+            }
+
+            return weeklyTarget;
+        }
+
         function renderChart() {
             const ctx = document.getElementById('salesChart').getContext('2d');
-            const labels = Array.from({ length: 31 }, (_, i) => `${i + 1} (${dayNames[new Date(2024, 6, i + 1).getDay()]})`);
+            const labels = Array.from({ length: 30 }, (_, i) => `${i + 1} (${dayNames[new Date(2024, 5, i + 1).getDay()]})`);
             const sales = salesData.map(data => data.sales);
             const targets = salesData.map(data => data.target);
 
@@ -408,32 +424,12 @@
             const totalTarget = salesData.reduce((sum, data) => sum + data.target, 0);
             const totalSales = salesData.reduce((sum, data) => sum + data.sales, 0);
             const achievementRate = (totalSales / totalTarget) * 100;
-
             const weeklyTarget = calculateWeeklyTarget();
 
             document.getElementById('totalTarget').innerText = formatCurrency(totalTarget);
             document.getElementById('totalSales').innerText = formatCurrency(totalSales);
             document.getElementById('achievementRate').innerText = `${achievementRate.toFixed(2)}%`;
             document.getElementById('weeklyTarget').innerText = formatCurrency(weeklyTarget);
-        }
-
-        function calculateWeeklyTarget() {
-            const today = new Date();
-            const currentDay = today.getDay();
-            const startOfWeek = new Date(today);
-            startOfWeek.setDate(today.getDate() - currentDay + 1); // Monday
-            const endOfWeek = new Date(startOfWeek);
-            endOfWeek.setDate(startOfWeek.getDate() + 6); // Sunday
-
-            let weeklyTarget = 0;
-            salesData.forEach((data, index) => {
-                const date = new Date(2024, 6, index + 1); // Julho de 2024
-                if (date >= startOfWeek && date <= endOfWeek) {
-                    weeklyTarget += data.target;
-                }
-            });
-
-            return weeklyTarget;
         }
 
         function checkLoginStatus() {
