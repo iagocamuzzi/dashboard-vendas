@@ -108,7 +108,7 @@
         </div>
         <div class="summary">
             <div class="card">
-                <h5>Total Meta do Mês e Vendas Realizadas</h5>
+                <h5>Mês</h5>
                 <p id="totalTarget">Meta: R$ 0,00</p>
                 <p id="totalSales">Vendas: R$ 0,00</p>
             </div>
@@ -117,7 +117,7 @@
                 <p id="achievementRate">0%</p>
             </div>
             <div class="card">
-                <h5>Meta Semanal e Vendas Realizadas na Semana</h5>
+                <h5>Semana</h5>
                 <p id="weeklyTarget">Meta: R$ 0,00</p>
                 <p id="weeklySales">Vendas: R$ 0,00</p>
             </div>
@@ -134,7 +134,7 @@
                 </div>
                 <button class="btn btn-primary" onclick="updateSales()">Atualizar</button>
                 <button class="btn btn-success ml-2" onclick="sendWhatsAppMessage()">Enviar WhatsApp</button>
-                <button class="btn btn-secondary ml-2" id="editTargetsButton" style="display:none;" onclick="window.location.href='editar_metas.html'">Editar Metas</button>
+                <button class="btn btn-info ml-2" id="editTargetsButton" style="display: none;" onclick="window.location.href='editar-metas.html'">Editar Metas</button>
             </div>
         </div>
         <div class="table-container">
@@ -217,6 +217,21 @@
                 renderTable();
                 renderChart();
                 updateSummary();
+                // Listen for changes in Firebase Realtime Database
+                database.ref('salesData').on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    console.log('Dados recebidos do Firebase em tempo real:', data);
+                    if (data) {
+                        salesData.forEach((item, index) => {
+                            item.target = data[index].target;
+                            item.sales = data[index].sales;
+                        });
+                        renderTable();
+                        renderChart();
+                        updateSummary();
+                        calculateWeeklyTarget();
+                    }
+                });
             } else {
                 document.getElementById('login-error').style.display = 'block';
                 console.log('Usuário ou senha incorretos');
@@ -229,7 +244,38 @@
             }
         }
 
-        const salesData = [];
+        const salesData = [
+            { target: 1611, sales: 0 },
+            { target: 0, sales: 0 },
+            { target: 1345, sales: 0 },
+            { target: 1530, sales: 0 },
+            { target: 1423, sales: 0 },
+            { target: 1651, sales: 0 },
+            { target: 3244, sales: 0 },
+            { target: 3560, sales: 0 },
+            { target: 0, sales: 0 },
+            { target: 1284, sales: 0 },
+            { target: 8581, sales: 0 },
+            { target: 32368, sales: 0 },
+            { target: 1705, sales: 0 },
+            { target: 1277, sales: 0 },
+            { target: 1730, sales: 0 },
+            { target: 0, sales: 0 },
+            { target: 1361, sales: 0 },
+            { target: 1102, sales: 0 },
+            { target: 1377, sales: 0 },
+            { target: 1331, sales: 0 },
+            { target: 727, sales: 0 },
+            { target: 1760, sales: 0 },
+            { target: 0, sales: 0 },
+            { target: 776, sales: 0 },
+            { target: 834, sales: 0 },
+            { target: 687, sales: 0 },
+            { target: 780, sales: 0 },
+            { target: 1185, sales: 0 },
+            { target: 1472, sales: 0 },
+            { target: 0, sales: 0 }
+        ];
 
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -372,19 +418,17 @@
         }
 
         function calculateWeeklyTarget() {
-            const currentDate = new Date();
-            const currentDay = currentDate.getDate();
-            const currentWeekDay = currentDate.getDay(); // 0 (Domingo) a 6 (Sábado)
-            const startOfWeek = currentDay - currentWeekDay; // Início da semana (Domingo)
-            const endOfWeek = startOfWeek + 6; // Fim da semana (Sábado)
+            const today = new Date();
+            const startOfWeek = today.getDate() - today.getDay();
+            const endOfWeek = startOfWeek + 6;
 
             let weeklyTarget = 0;
             let weeklySales = 0;
 
             for (let i = startOfWeek; i <= endOfWeek; i++) {
-                if (i >= 1 && i <= 31) { // Garante que os dias estão dentro do mês
-                    weeklyTarget += salesData[i - 1].target || 0;
-                    weeklySales += salesData[i - 1].sales || 0;
+                if (i > 0 && i <= salesData.length) {
+                    weeklyTarget += salesData[i - 1].target;
+                    weeklySales += salesData[i - 1].sales;
                 }
             }
 
@@ -430,9 +474,9 @@
                 const data = snapshot.val();
                 console.log('Dados carregados do Firebase:', data);
                 if (data) {
-                    salesData.length = 0; // Clear current salesData array
-                    data.forEach((item, index) => {
-                        salesData.push(item);
+                    salesData.forEach((item, index) => {
+                        item.target = data[index].target;
+                        item.sales = data[index].sales;
                     });
                     renderTable();
                     renderChart();
@@ -449,7 +493,6 @@
         renderTable();
         renderChart();
         updateSummary();
-        calculateWeeklyTarget();
     </script>
 </body>
 </html>
