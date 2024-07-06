@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,18 +12,15 @@
             margin: 0;
             padding: 0;
         }
-
         .container {
             margin-top: 20px;
             background-color: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
         }
-
         .chart-container {
             margin-top: 20px;
         }
-
         .login-container {
             max-width: 400px;
             margin: auto;
@@ -34,31 +30,26 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-
         .logo {
             display: block;
             margin: 0 auto 20px;
             max-width: 100%;
             height: auto;
         }
-
         .header .logo {
             float: left;
             margin-right: 20px;
             margin-bottom: 10px;
         }
-
         .highlight {
             background-color: #ffff99 !important;
         }
-
         .summary {
             margin: 20px 0;
             display: flex;
             justify-content: space-around;
             text-align: center;
         }
-
         .summary .card {
             flex: 1;
             margin: 10px;
@@ -68,28 +59,32 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-
         .summary .card h5 {
             margin-bottom: 15px;
         }
-
         .summary .card p {
             font-size: 1.2em;
             margin: 0;
         }
-
+        /* Remove arrows from input number fields */
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
         .status-atingida {
             font-weight: bold;
             color: green;
         }
-
         .status-nao-atingida {
             font-weight: bold;
             color: red;
         }
     </style>
 </head>
-
 <body>
     <div class="login-container" id="login-container">
         <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png" alt="Logomarca Cacau Show" class="logo">
@@ -112,10 +107,13 @@
             <h1>Dashboard de Metas de Vendas Diárias - Julho</h1>
         </div>
         <div class="summary">
-            <div class="card" id="monthlySummaryCard">
+            <div class="card">
                 <h5>Mês</h5>
                 <p id="totalTarget">Meta: R$ 0,00</p>
                 <p id="totalSales">Vendas: R$ 0,00</p>
+            </div>
+            <div class="card">
+                <h5>Percentual de Atingimento</h5>
                 <p id="achievementRate">0%</p>
             </div>
             <div class="card" id="weeklySummaryCard">
@@ -158,7 +156,7 @@
             <canvas id="salesChart" width="600" height="300"></canvas>
         </div>
         <button class="btn btn-danger" onclick="logout()">Logout</button>
-        <button class="btn btn-info mt-3" id="editTargetsButton" style="display:none;" onclick="window.location.href='editar-metas.html'">Editar Metas</button>
+        <button id="editTargetsButton" class="btn btn-info mt-3" style="display: none;" onclick="location.href='edit-metas.html'">Editar Metas</button>
     </div>
 
     <!-- Biblioteca Chart.js -->
@@ -171,13 +169,13 @@
     <script>
         // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID",
-            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com/"
+            apiKey: "AIzaSyBgUn5EBlVhbhYhyWjyrzfOAjadf9v6Pms",
+            authDomain: "dashboardcs-b46d8.firebaseapp.com",
+            projectId: "dashboardcs-b46d8",
+            storageBucket: "dashboardcs-b46d8.appspot.com",
+            messagingSenderId: "214815582221",
+            appId: "1:214815582221:web:842f78088a3e5b901c8d44",
+            databaseURL: "https://dashboardcs-b46d8-default-rtdb.firebaseio.com/"
         };
 
         // Initialize Firebase
@@ -219,21 +217,7 @@
                 renderTable();
                 renderChart();
                 updateSummary();
-                // Listen for changes in Firebase Realtime Database
-                database.ref('salesData').on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    console.log('Dados recebidos do Firebase em tempo real:', data);
-                    if (data) {
-                        salesData.forEach((item, index) => {
-                            item.target = data[index].target;
-                            item.sales = data[index].sales;
-                        });
-                        renderTable();
-                        renderChart();
-                        updateSummary();
-                        calculateWeeklyTarget();
-                    }
-                });
+                calculateWeeklyTarget();
             } else {
                 document.getElementById('login-error').style.display = 'block';
                 console.log('Usuário ou senha incorretos');
@@ -420,23 +404,21 @@
         }
 
         function calculateWeeklyTarget() {
-            const currentDate = new Date();
-            const currentWeekday = currentDate.getDay();
-            const startOfWeek = new Date(currentDate);
-            startOfWeek.setDate(currentDate.getDate() - currentWeekday);
-            const endOfWeek = new Date(currentDate);
-            endOfWeek.setDate(currentDate.getDate() + (6 - currentWeekday));
+            const today = new Date();
+            const currentDay = today.getDate();
+            const currentWeekDay = today.getDay();
+            const startOfWeek = currentDay - currentWeekDay;
+            const endOfWeek = startOfWeek + 6;
 
             let weeklyTarget = 0;
             let weeklySales = 0;
 
-            salesData.forEach((data, index) => {
-                const date = new Date(2024, 6, index + 1);
-                if (date >= startOfWeek && date <= endOfWeek) {
-                    weeklyTarget += data.target;
-                    weeklySales += data.sales;
+            for (let i = startOfWeek; i <= endOfWeek; i++) {
+                if (i > 0 && i <= salesData.length) {
+                    weeklyTarget += salesData[i - 1].target;
+                    weeklySales += salesData[i - 1].sales;
                 }
-            });
+            }
 
             const weeklySummaryCard = document.getElementById('weeklySummaryCard');
             document.getElementById('weeklyTarget').innerText = `Meta: ${formatCurrency(weeklyTarget)}`;
@@ -508,5 +490,4 @@
         updateSummary();
     </script>
 </body>
-
 </html>
