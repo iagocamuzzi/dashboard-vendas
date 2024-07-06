@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Metas de Vendas Diárias - Julho</title>
-    <link rel="icon" type="image/png" href="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png" type="image/png">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -48,7 +48,6 @@
         .summary {
             margin: 20px 0;
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-around;
             text-align: center;
         }
@@ -60,7 +59,6 @@
             color: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            min-width: 150px; /* Ensure cards don't shrink too much on small screens */
         }
         .summary .card h5 {
             margin-bottom: 15px;
@@ -68,23 +66,6 @@
         .summary .card p {
             font-size: 1.2em;
             margin: 0;
-        }
-        .form-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: center;
-        }
-        .form-group {
-            margin: 10px;
-            flex: 1;
-            min-width: 200px; /* Ensure form fields don't shrink too much on small screens */
-        }
-        .table-container {
-            overflow-x: auto;
-        }
-        .table-container table {
-            width: 100%;
         }
         .status-atingida {
             font-weight: bold;
@@ -275,7 +256,7 @@
             { target: 0, sales: 0 }
         ];
 
-        const dayNames = ['Dom', 'Seg', 'Ter', Qua', 'Qui', 'Sex', 'Sáb'];
+        const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
         function formatCurrency(value) {
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
