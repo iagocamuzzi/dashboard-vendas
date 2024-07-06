@@ -66,15 +66,6 @@
             font-size: 1.2em;
             margin: 0;
         }
-        /* Remove arrows from input number fields */
-        input[type=number]::-webkit-outer-spin-button,
-        input[type=number]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
         .status-atingida {
             font-weight: bold;
             color: green;
@@ -112,14 +103,14 @@
                 <p id="totalTarget">Meta: R$ 0,00</p>
                 <p id="totalSales">Vendas: R$ 0,00</p>
             </div>
-            <div class="card">
-                <h5>Percentual de Atingimento</h5>
-                <p id="achievementRate">0%</p>
-            </div>
             <div class="card" id="weeklySummaryCard">
                 <h5>Semana</h5>
                 <p id="weeklyTarget">Meta: R$ 0,00</p>
                 <p id="weeklySales">Vendas: R$ 0,00</p>
+            </div>
+            <div class="card">
+                <h5>Percentual de Atingimento</h5>
+                <p id="achievementRate">0%</p>
             </div>
         </div>
         <div class="form-container text-center">
@@ -156,7 +147,7 @@
             <canvas id="salesChart" width="600" height="300"></canvas>
         </div>
         <button class="btn btn-danger" onclick="logout()">Logout</button>
-        <button id="editTargetsButton" class="btn btn-info mt-3" style="display: none;" onclick="location.href='edit-metas.html'">Editar Metas</button>
+        <button id="editTargetsButton" class="btn btn-info" onclick="window.location.href='edit-targets.html'" style="display: none;">Editar Metas</button>
     </div>
 
     <!-- Biblioteca Chart.js -->
@@ -218,6 +209,7 @@
                 renderChart();
                 updateSummary();
                 calculateWeeklyTarget();
+                calculateWeeklySales();
             } else {
                 document.getElementById('login-error').style.display = 'block';
                 console.log('Usuário ou senha incorretos');
@@ -286,6 +278,7 @@
                 renderChart();
                 updateSummary();
                 calculateWeeklyTarget();
+                calculateWeeklySales();
                 // Limpar os campos de entrada
                 document.getElementById('day').value = '';
                 document.getElementById('sales').value = '';
@@ -405,25 +398,37 @@
 
         function calculateWeeklyTarget() {
             const today = new Date();
-            const currentDay = today.getDate();
-            const currentWeekDay = today.getDay();
-            const startOfWeek = currentDay - currentWeekDay;
+            const dayOfWeek = today.getDay();
+            const startOfWeek = today.getDate() - dayOfWeek;
             const endOfWeek = startOfWeek + 6;
 
             let weeklyTarget = 0;
-            let weeklySales = 0;
-
             for (let i = startOfWeek; i <= endOfWeek; i++) {
-                if (i > 0 && i <= salesData.length) {
+                if (i >= 1 && i <= 31) {
                     weeklyTarget += salesData[i - 1].target;
+                }
+            }
+
+            document.getElementById('weeklyTarget').innerText = `Meta: ${formatCurrency(weeklyTarget)}`;
+        }
+
+        function calculateWeeklySales() {
+            const today = new Date();
+            const dayOfWeek = today.getDay();
+            const startOfWeek = today.getDate() - dayOfWeek;
+            const endOfWeek = startOfWeek + 6;
+
+            let weeklySales = 0;
+            for (let i = startOfWeek; i <= endOfWeek; i++) {
+                if (i >= 1 && i <= 31) {
                     weeklySales += salesData[i - 1].sales;
                 }
             }
 
-            const weeklySummaryCard = document.getElementById('weeklySummaryCard');
-            document.getElementById('weeklyTarget').innerText = `Meta: ${formatCurrency(weeklyTarget)}`;
+            const weeklyTarget = parseFloat(document.getElementById('weeklyTarget').innerText.replace(/[^\d,]/g, '').replace(',', '.'));
             document.getElementById('weeklySales').innerText = `Vendas: ${formatCurrency(weeklySales)}`;
 
+            const weeklySummaryCard = document.getElementById('weeklySummaryCard');
             if (weeklySales >= weeklyTarget) {
                 weeklySummaryCard.style.backgroundColor = 'green';
             } else {
@@ -450,6 +455,7 @@
                 renderChart();
                 updateSummary();
                 calculateWeeklyTarget();
+                calculateWeeklySales();
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
@@ -477,6 +483,7 @@
                     renderChart();
                     updateSummary();
                     calculateWeeklyTarget();
+                    calculateWeeklySales();
                 }
             });
         }
@@ -488,6 +495,8 @@
         renderTable();
         renderChart();
         updateSummary();
+        calculateWeeklyTarget();
+        calculateWeeklySales();
     </script>
 </body>
 </html>
