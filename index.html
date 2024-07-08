@@ -398,20 +398,23 @@
         }
 
         function calculateWeeklyTarget() {
-            const today = new Date();
-            const dayOfWeek = today.getDay();
-            const startOfWeek = today.getDate() - dayOfWeek;
-            const endOfWeek = startOfWeek + 6;
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    
+    // Identificar o início da semana (segunda-feira) e o final da semana (domingo)
+    const startOfWeek = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Se hoje é domingo, ajuste o início da semana para a segunda anterior
+    const endOfWeek = startOfWeek + 6;
 
-            let weeklyTarget = 0;
-            for (let i = startOfWeek; i <= endOfWeek; i++) {
-                if (i >= 1 && i <= 31) {
-                    weeklyTarget += salesData[i - 1].target;
-                }
-            }
-
-            document.getElementById('weeklyTarget').innerText = `Meta: ${formatCurrency(weeklyTarget)}`;
+    let weeklyTarget = 0;
+    for (let i = startOfWeek; i <= endOfWeek; i++) {
+        if (i >= 1 && i <= 31) { // Ajustar o número de dias conforme o mês
+            weeklyTarget += salesData[i - 1].target;
         }
+    }
+
+    document.getElementById('weeklyTarget').innerText = `Meta: ${formatCurrency(weeklyTarget)}`;
+}
+
 
         function calculateWeeklySales() {
             const today = new Date();
