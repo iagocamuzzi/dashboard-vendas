@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard de Metas de Vendas Diárias - Julho</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png" type="image/x-icon">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -253,7 +254,7 @@
             { target: 1185, sales: 0 },
             { target: 1472, sales: 0 },
             { target: 0, sales: 0 },
-            { target: 2000, sales: 0 } // Adicionando o dia 31
+            { target: 1332, sales: 0 }
         ];
 
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
@@ -400,7 +401,7 @@
         function calculateWeeklyTarget() {
             const today = new Date();
             const dayOfWeek = today.getDay();
-            const startOfWeek = today.getDate() - dayOfWeek;
+            const startOfWeek = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
             const endOfWeek = startOfWeek + 6;
 
             let weeklyTarget = 0;
@@ -416,7 +417,7 @@
         function calculateWeeklySales() {
             const today = new Date();
             const dayOfWeek = today.getDay();
-            const startOfWeek = today.getDate() - dayOfWeek;
+            const startOfWeek = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
             const endOfWeek = startOfWeek + 6;
 
             let weeklySales = 0;
