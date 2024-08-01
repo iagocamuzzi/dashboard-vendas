@@ -92,9 +92,25 @@
             for (let i = 0; i < salesData.length; i++) {
                 currentWeek.push(salesData[i]);
                 if (new Date(2024, 6, i + 1).getDay() === 0 || i === salesData.length - 1) {
-                    weeks.push({ weekNumber, data: currentWeek });
-                    currentWeek = [];
-                    weekNumber++;
+                    if (currentWeek.length > 0) {
+                        weeks.push({ weekNumber, data: currentWeek });
+                        currentWeek = [];
+                        weekNumber++;
+                    }
+                }
+            }
+
+            // Ensuring the first week starts on Monday and last week ends on Sunday
+            let startOfWeek = 0;
+            for (let i = 0; i < salesData.length; i++) {
+                const dayOfWeek = new Date(2024, 6, i + 1).getDay();
+                if (dayOfWeek === 1) {
+                    startOfWeek = i;
+                }
+                if (dayOfWeek === 0 || i === salesData.length - 1) {
+                    const weekData = salesData.slice(startOfWeek, i + 1);
+                    weeks.push({ weekNumber: weekNumber++, data: weekData });
+                    startOfWeek = i + 1;
                 }
             }
 
