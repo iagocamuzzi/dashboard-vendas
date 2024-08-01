@@ -88,14 +88,26 @@
             const weeks = [];
             let currentWeek = [];
             let weekNumber = 1;
+            let totalTarget = 0;
+            let totalSales = 0;
 
             for (let i = 0; i < salesData.length; i++) {
                 const dayOfWeek = new Date(2024, 6, i + 1).getDay();
                 currentWeek.push(salesData[i]);
+                totalTarget += salesData[i].target;
+                totalSales += salesData[i].sales;
+
                 if (dayOfWeek === 0 || i === salesData.length - 1) {
                     if (currentWeek.length > 0) {
-                        weeks.push({ weekNumber, data: currentWeek });
+                        weeks.push({ 
+                            weekNumber, 
+                            totalTarget, 
+                            totalSales, 
+                            percentageSold: (totalSales / totalTarget) * 100 
+                        });
                         currentWeek = [];
+                        totalTarget = 0;
+                        totalSales = 0;
                         weekNumber++;
                     }
                 }
@@ -109,16 +121,12 @@
             tableBody.innerHTML = '';
 
             weeks.forEach(week => {
-                const totalTarget = week.data.reduce((sum, item) => sum + item.target, 0);
-                const totalSales = week.data.reduce((sum, item) => sum + item.sales, 0);
-                const percentageSold = (totalSales / totalTarget) * 100;
-
                 tableBody.innerHTML += `
                     <tr>
                         <td>${week.weekNumber}</td>
-                        <td>${formatCurrency(totalTarget)}</td>
-                        <td>${formatCurrency(totalSales)}</td>
-                        <td>${percentageSold.toFixed(2)}%</td>
+                        <td>${formatCurrency(week.totalTarget)}</td>
+                        <td>${formatCurrency(week.totalSales)}</td>
+                        <td>${week.percentageSold.toFixed(2)}%</td>
                     </tr>
                 `;
             });
