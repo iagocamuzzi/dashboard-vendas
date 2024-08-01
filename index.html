@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Metas de Vendas Diárias - Julho</title>
+    <title>Dashboard de Metas de Vendas Diárias</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png" type="image/x-icon">
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png" type="image/png">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -96,7 +96,7 @@
     <div class="container" id="dashboard-container" style="display: none;">
         <div class="header text-center">
             <img src="https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Cacau_Show.png" alt="Logomarca Cacau Show" class="logo">
-            <h1>Dashboard de Metas de Vendas Diárias - Julho</h1>
+            <h1 id="dashboard-title">Dashboard de Metas de Vendas Diárias</h1>
         </div>
         <div class="summary">
             <div class="card">
@@ -183,6 +183,9 @@
         let lastUpdatedDay = null;
         let salesChart = null;
         let currentUserRole = 'user';
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
         function login() {
             const username = document.getElementById('username').value.toLowerCase();
@@ -202,6 +205,7 @@
                 localStorage.setItem('userRole', user.role); // Armazena o papel do usuário
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
+                document.getElementById('dashboard-title').innerText = `Dashboard de Metas de Vendas Diárias - ${monthNames[currentMonth]} ${currentYear}`;
                 if (currentUserRole === 'admin') {
                     document.getElementById('editTargetsButton').style.display = 'inline-block';
                 }
@@ -223,39 +227,7 @@
             }
         }
 
-        const salesData = [
-            { target: 1611, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1345, sales: 0 },
-            { target: 1530, sales: 0 },
-            { target: 1423, sales: 0 },
-            { target: 1651, sales: 0 },
-            { target: 3244, sales: 0 },
-            { target: 3560, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1284, sales: 0 },
-            { target: 8581, sales: 0 },
-            { target: 32368, sales: 0 },
-            { target: 1705, sales: 0 },
-            { target: 1277, sales: 0 },
-            { target: 1730, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1361, sales: 0 },
-            { target: 1102, sales: 0 },
-            { target: 1377, sales: 0 },
-            { target: 1331, sales: 0 },
-            { target: 727, sales: 0 },
-            { target: 1760, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 776, sales: 0 },
-            { target: 834, sales: 0 },
-            { target: 687, sales: 0 },
-            { target: 780, sales: 0 },
-            { target: 1185, sales: 0 },
-            { target: 1472, sales: 0 },
-            { target: 0, sales: 0 },
-            { target: 1332, sales: 0 }
-        ];
+        let salesData = new Array(31).fill().map(() => ({ target: 0, sales: 0 }));
 
         const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
@@ -309,7 +281,7 @@
             tableBody.innerHTML = '';
             const today = new Date().getDate();
             salesData.forEach((data, index) => {
-                const date = new Date(2024, 6, index + 1); // Julho de 2024
+                const date = new Date(currentYear, currentMonth, index + 1);
                 const dayName = dayNames[date.getDay()];
                 let status = '';
                 let statusClass = '';
@@ -331,7 +303,7 @@
 
         function renderChart() {
             const ctx = document.getElementById('salesChart').getContext('2d');
-            const labels = Array.from({ length: 31 }, (_, i) => `${i + 1} (${dayNames[new Date(2024, 6, i + 1).getDay()]})`);
+            const labels = Array.from({ length: 31 }, (_, i) => `${i + 1} (${dayNames[new Date(currentYear, currentMonth, i + 1).getDay()]})`);
             const sales = salesData.map(data => data.sales);
             const targets = salesData.map(data => data.target);
 
@@ -401,7 +373,7 @@
         function calculateWeeklyTarget() {
             const today = new Date();
             const dayOfWeek = today.getDay();
-            const startOfWeek = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+            const startOfWeek = today.getDate() - dayOfWeek;
             const endOfWeek = startOfWeek + 6;
 
             let weeklyTarget = 0;
@@ -417,7 +389,7 @@
         function calculateWeeklySales() {
             const today = new Date();
             const dayOfWeek = today.getDay();
-            const startOfWeek = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+            const startOfWeek = today.getDate() - dayOfWeek;
             const endOfWeek = startOfWeek + 6;
 
             let weeklySales = 0;
@@ -452,6 +424,7 @@
                 if (currentUserRole === 'admin') {
                     document.getElementById('editTargetsButton').style.display = 'inline-block';
                 }
+                document.getElementById('dashboard-title').innerText = `Dashboard de Metas de Vendas Diárias - ${monthNames[currentMonth]} ${currentYear}`;
                 loadSalesData();
                 renderTable();
                 renderChart();
@@ -477,10 +450,7 @@
                 const data = snapshot.val();
                 console.log('Dados carregados do Firebase:', data);
                 if (data) {
-                    salesData.forEach((item, index) => {
-                        item.target = data[index].target;
-                        item.sales = data[index].sales;
-                    });
+                    salesData = data;
                     renderTable();
                     renderChart();
                     updateSummary();
