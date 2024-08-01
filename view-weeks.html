@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semanas do Mês - Análise de Metas</title>
+    <title>Ver Semanas</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -28,15 +28,15 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center">Semanas do Mês - Análise de Metas</h1>
+        <h1 class="text-center">Resumo Semanal de Vendas</h1>
         <div class="table-container">
             <table class="table table-bordered table-striped">
                 <thead class="thead-dark">
                     <tr>
                         <th>Semana</th>
-                        <th>Meta da Semana (R$)</th>
-                        <th>Vendas da Semana (R$)</th>
-                        <th>Percentual de Atingimento</th>
+                        <th>Meta Semanal (R$)</th>
+                        <th>Vendas Semanais (R$)</th>
+                        <th>Percentual Vendido</th>
                     </tr>
                 </thead>
                 <tbody id="weeksTable">
@@ -73,66 +73,51 @@
             return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        function calculateWeeklyData() {
-            const weeksData = [];
-            let startOfWeek = 1;
-            let endOfWeek = 7;
-            let weekNumber = 1;
-
-            while (startOfWeek <= 31) {
-                let weeklyTarget = 0;
-                let weeklySales = 0;
-
-                for (let i = startOfWeek; i <= endOfWeek && i <= 31; i++) {
-                    weeklyTarget += salesData[i - 1]?.target || 0;
-                    weeklySales += salesData[i - 1]?.sales || 0;
-                }
-
-                const achievementRate = weeklyTarget > 0 ? (weeklySales / weeklyTarget) * 100 : 0;
-
-                weeksData.push({
-                    weekNumber,
-                    weeklyTarget,
-                    weeklySales,
-                    achievementRate: achievementRate.toFixed(2)
-                });
-
-                startOfWeek += 7;
-                endOfWeek += 7;
-                weekNumber++;
-            }
-
-            return weeksData;
-        }
-
-        function renderWeeksTable() {
-            const tableBody = document.getElementById('weeksTable');
-            tableBody.innerHTML = '';
-
-            const weeksData = calculateWeeklyData();
-
-            weeksData.forEach(data => {
-                tableBody.innerHTML += `
-                    <tr>
-                        <td>Semana ${data.weekNumber}</td>
-                        <td>${formatCurrency(data.weeklyTarget)}</td>
-                        <td>${formatCurrency(data.weeklySales)}</td>
-                        <td>${data.achievementRate}%</td>
-                    </tr>
-                `;
-            });
-        }
-
         function loadSalesData() {
             database.ref('salesData').once('value').then((snapshot) => {
                 const data = snapshot.val();
                 console.log('Dados carregados do Firebase:', data);
                 if (data) {
-                    data.forEach((item) => {
-                        salesData.push(item);
-                    });
-                    renderWeeksTable();
+                    salesData.splice(0, salesData.length, ...data);
+                    calculateWeeklyData();
                 }
+            });
+        }
+
+        function calculateWeeklyData() {
+            const weeks = [];
+            let currentWeek = [];
+            let weekNumber = 1;
+
+            for (let i = 0; i < salesData.length; i++) {
+                currentWeek.push(salesData[i]);
+                if (new Date(2024, 6, i + 1).getDay() === 0 || i === salesData.length - 1) {
+                    weeks.push({ weekNumber, data: currentWeek });
+                    currentWeek = [];
+                    weekNumber++;
+                }
+            }
+
+            renderWeeksTable(weeks);
+        }
+
+        function renderWeeksTable(weeks) {
+            const tableBody = document.getElementById('weeksTable');
+            tableBody.innerHTML = '';
+
+            weeks.forEach(week => {
+                const totalTarget = week.data.reduce((sum, item) => sum + item.target, 0);
+                const totalSales = week.data.reduce((sum, item) => sum + item.sales, 0);
+                const percentageSold = (totalSales / totalTarget) * 100;
+
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${week.weekNumber}</td>
+                        <td>${formatCurrency(totalTarget)}</td>
+                        <td>${formatCurrency(totalSales)}</td>
+                        <td>${percentageSold.toFixed(2)}%</td>
+                    </tr>
+                `;
             });
         }
 
