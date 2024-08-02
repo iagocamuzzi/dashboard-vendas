@@ -92,11 +92,12 @@
             let totalSales = 0;
 
             for (let i = 0; i < salesData.length; i++) {
-                const dayOfWeek = new Date(2024, 6, i + 1).getDay();
+                const dayOfWeek = new Date(2024, new Date().getMonth(), i + 1).getDay();
                 currentWeek.push(salesData[i]);
                 totalTarget += salesData[i].target;
                 totalSales += salesData[i].sales;
 
+                // Check if it's Sunday or the last day of the month
                 if (dayOfWeek === 0 || i === salesData.length - 1) {
                     if (currentWeek.length > 0) {
                         weeks.push({ 
