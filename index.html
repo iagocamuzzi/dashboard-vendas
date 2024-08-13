@@ -158,7 +158,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
 
     <script>
-        // Your web app's Firebase configuration
+        // Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBgUn5EBlVhbhYhyWjyrzfOAjadf9v6Pms",
             authDomain: "dashboardcs-b46d8.firebaseapp.com",
@@ -169,7 +169,7 @@
             databaseURL: "https://dashboardcs-b46d8-default-rtdb.firebaseio.com/"
         };
 
-        // Initialize Firebase
+        // Inicializar o Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
@@ -187,18 +187,14 @@
             const username = document.getElementById('username').value.toLowerCase();
             const password = document.getElementById('password').value;
 
-            console.log('Tentativa de login com usuário:', username);
-            console.log('Verificando usuário e senha...');
-
             const user = users.find(user => user.username === username && user.password === password);
 
             if (user) {
-                console.log('Login bem-sucedido');
                 currentUserRole = user.role;
                 const loginTime = new Date().getTime();
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('loginTime', loginTime);
-                localStorage.setItem('userRole', user.role); // Armazena o papel do usuário
+                localStorage.setItem('userRole', user.role);
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
                 if (currentUserRole === 'admin') {
@@ -212,7 +208,6 @@
                 calculateWeeklySales();
             } else {
                 document.getElementById('login-error').style.display = 'block';
-                console.log('Usuário ou senha incorretos');
             }
         }
 
@@ -262,7 +257,6 @@
         }
 
         function saveSalesData() {
-            console.log('Salvando dados no Firebase:', salesData);
             database.ref('salesData').set(salesData);
         }
 
@@ -279,7 +273,6 @@
                 updateSummary();
                 calculateWeeklyTarget();
                 calculateWeeklySales();
-                // Limpar os campos de entrada
                 document.getElementById('day').value = '';
                 document.getElementById('sales').value = '';
             } else {
@@ -293,7 +286,7 @@
                 const sales = salesData[lastUpdatedDay - 1].sales;
                 const status = sales >= target ? 'Meta Atingida 🎉' : 'Meta Não Atingida ❌';
                 const message = `📅 Dia: ${lastUpdatedDay}\n🎯 Meta: ${formatCurrency(target)}\n💰 Vendas Realizadas: ${formatCurrency(sales)}\n📊 Status: ${status}`;
-                const phoneNumber = '5527997635942';  // Número de telefone do destinatário no formato internacional
+                const phoneNumber = '5527997635942';
                 const whatsappUrl = `https://api.whatsapp.com/send?phone=${phoneNumber}&text=${encodeURIComponent(message)}`;
 
                 window.open(whatsappUrl, '_blank');
@@ -307,7 +300,7 @@
             tableBody.innerHTML = '';
             const today = new Date().getDate();
             salesData.forEach((data, index) => {
-                const date = new Date(2024, 6, index + 1); // Agosto de 2024
+                const date = new Date(2024, 7, index + 1); // Agosto de 2024
                 const dayName = dayNames[date.getDay()];
                 let status = '';
                 let statusClass = '';
@@ -333,7 +326,6 @@
             const sales = salesData.map(data => data.sales);
             const targets = salesData.map(data => data.target);
 
-            // Destroy the existing chart if it exists
             if (salesChart) {
                 salesChart.destroy();
             }
@@ -399,8 +391,8 @@
         function calculateWeeklyTarget() {
             const today = new Date();
             const dayOfWeek = today.getDay();
-            const startOfWeek = today.getDate() - dayOfWeek;
-            const endOfWeek = startOfWeek + 6;
+            const startOfWeek = today.getDate() - dayOfWeek + 1; // Início da semana: segunda-feira
+            const endOfWeek = startOfWeek + 6; // Final da semana: domingo
 
             let weeklyTarget = 0;
             for (let i = startOfWeek; i <= endOfWeek; i++) {
@@ -415,8 +407,8 @@
         function calculateWeeklySales() {
             const today = new Date();
             const dayOfWeek = today.getDay();
-            const startOfWeek = today.getDate() - dayOfWeek;
-            const endOfWeek = startOfWeek + 6;
+            const startOfWeek = today.getDate() - dayOfWeek + 1; // Início da semana: segunda-feira
+            const endOfWeek = startOfWeek + 6; // Final da semana: domingo
 
             let weeklySales = 0;
             for (let i = startOfWeek; i <= endOfWeek; i++) {
@@ -439,14 +431,14 @@
         function checkLoginStatus() {
             const isLoggedIn = localStorage.getItem('isLoggedIn');
             const loginTime = localStorage.getItem('loginTime');
-            const userRole = localStorage.getItem('userRole'); // Obtém o papel do usuário
+            const userRole = localStorage.getItem('userRole');
             const currentTime = new Date().getTime();
-            const sessionDuration = 5 * 60 * 1000; // 5 minutos em milissegundos
+            const sessionDuration = 5 * 60 * 1000;
 
             if (isLoggedIn === 'true' && (currentTime - loginTime) < sessionDuration) {
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('dashboard-container').style.display = 'block';
-                currentUserRole = userRole; // Define o papel do usuário atual
+                currentUserRole = userRole;
                 if (currentUserRole === 'admin') {
                     document.getElementById('editTargetsButton').style.display = 'inline-block';
                 }
@@ -459,21 +451,20 @@
             } else {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('loginTime');
-                localStorage.removeItem('userRole'); // Remove o papel do usuário
+                localStorage.removeItem('userRole');
             }
         }
 
         function logout() {
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('loginTime');
-            localStorage.removeItem('userRole'); // Remove o papel do usuário
+            localStorage.removeItem('userRole');
             location.reload();
         }
 
         function loadSalesData() {
             database.ref('salesData').once('value').then((snapshot) => {
                 const data = snapshot.val();
-                console.log('Dados carregados do Firebase:', data);
                 if (data) {
                     salesData.forEach((item, index) => {
                         item.target = data[index].target;
@@ -490,7 +481,6 @@
 
         window.onload = checkLoginStatus;
 
-        // Initial render
         loadSalesData();
         renderTable();
         renderChart();
