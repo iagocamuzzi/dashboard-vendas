@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Metas de Vendas Diárias</title>
+    <title>Editar Metas - Dashboard de Vendas</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -18,34 +18,29 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
         }
-        .table-container {
-            margin-top: 20px;
+        .form-group {
+            margin-bottom: 15px;
         }
-        .back-button, .reset-sales-button, .view-weeks-button {
+        .btn-container {
+            display: flex;
+            justify-content: space-between;
             margin-top: 20px;
-            margin-right: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center">Editar Metas de Vendas Diárias</h1>
-        <div class="table-container">
-            <table class="table table-bordered table-striped">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Dia</th>
-                        <th>Meta (R$)</th>
-                    </tr>
-                </thead>
-                <tbody id="targetsTable">
-                    <!-- Table rows will be inserted here by JavaScript -->
-                </tbody>
-            </table>
-        </div>
-        <button class="btn btn-info back-button" onclick="window.location.href='index.html'">Voltar</button>
-        <button class="btn btn-danger reset-sales-button" onclick="resetSales()">Zerar Vendas</button>
-        <button class="btn btn-info view-weeks-button" onclick="window.location.href='view-weeks.html'">Verificar Semanas</button>
+        <h1 class="text-center">Editar Metas - Dashboard de Vendas</h1>
+        <form id="editTargetsForm">
+            <div id="targetsContainer">
+                <!-- Os campos de metas serão inseridos aqui via JavaScript -->
+            </div>
+            <div class="btn-container">
+                <button type="button" class="btn btn-primary" onclick="saveTargets()">Salvar Metas</button>
+                <button type="button" class="btn btn-danger" onclick="resetSales()">Zerar Vendas</button>
+                <button type="button" class="btn btn-info" onclick="window.location.href='semanas.html'">Visualizar Semanas</button>
+            </div>
+        </form>
     </div>
 
     <!-- Firebase -->
@@ -53,7 +48,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-database.js"></script>
 
     <script>
-        // Your web app's Firebase configuration
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBgUn5EBlVhbhYhyWjyrzfOAjadf9v6Pms",
             authDomain: "dashboardcs-b46d8.firebaseapp.com",
@@ -64,63 +59,56 @@
             databaseURL: "https://dashboardcs-b46d8-default-rtdb.firebaseio.com/"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const salesData = [];
+        const daysInMonth = new Date(2024, new Date().getMonth() + 1, 0).getDate(); // Obtém o número de dias no mês atual
+        let salesData = Array.from({ length: daysInMonth }, () => ({ target: 0, sales: 0 }));
 
-        function formatCurrency(value) {
-            return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        function loadTargets() {
+            database.ref('salesData').once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    salesData = data;
+                }
+                renderTargetsForm();
+            });
         }
 
-        function saveTargets() {
-            console.log('Salvando dados no Firebase:', salesData);
-            database.ref('salesData').set(salesData);
-        }
+        function renderTargetsForm() {
+            const container = document.getElementById('targetsContainer');
+            container.innerHTML = '';
 
-        function resetSales() {
-            salesData.forEach(item => item.sales = 0);
-            saveTargets();
-            renderTargetsTable();
-        }
-
-        function updateTarget(element, index) {
-            const newTarget = parseFloat(element.innerText.replace(/[^\d,]/g, '').replace(',', '.'));
-            if (!isNaN(newTarget) && newTarget >= 0) {
-                salesData[index].target = newTarget;
-                saveTargets();
-            } else {
-                alert('Por favor, insira um valor de meta válido.');
-                element.innerText = formatCurrency(salesData[index].target);
-            }
-        }
-
-        function renderTargetsTable() {
-            const tableBody = document.getElementById('targetsTable');
-            tableBody.innerHTML = '';
-            salesData.forEach((data, index) => {
-                tableBody.innerHTML += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td contenteditable="true" onblur="updateTarget(this, ${index})">${formatCurrency(data.target)}</td>
-                    </tr>
+            salesData.forEach((day, index) => {
+                container.innerHTML += `
+                    <div class="form-group row">
+                        <label for="target-${index}" class="col-sm-2 col-form-label">Dia ${index + 1}:</label>
+                        <div class="col-sm-10">
+                            <input type="number" class="form-control" id="target-${index}" value="${day.target}">
+                        </div>
+                    </div>
                 `;
             });
         }
 
-        function loadSalesData() {
-            database.ref('salesData').once('value').then((snapshot) => {
-                const data = snapshot.val();
-                console.log('Dados carregados do Firebase:', data);
-                if (data) {
-                    salesData.splice(0, salesData.length, ...data);
-                    renderTargetsTable();
-                }
+        function saveTargets() {
+            salesData.forEach((day, index) => {
+                const targetValue = parseFloat(document.getElementById(`target-${index}`).value);
+                salesData[index].target = isNaN(targetValue) ? 0 : targetValue;
+            });
+            database.ref('salesData').set(salesData).then(() => {
+                alert('Metas salvas com sucesso!');
             });
         }
 
-        window.onload = loadSalesData;
+        function resetSales() {
+            salesData.forEach(day => day.sales = 0);
+            database.ref('salesData').set(salesData).then(() => {
+                alert('Vendas zeradas com sucesso!');
+            });
+        }
+
+        window.onload = loadTargets;
     </script>
 </body>
 </html>
