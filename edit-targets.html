@@ -65,13 +65,18 @@
         const currentYear = new Date().getFullYear();
         const currentMonth = new Date().getMonth(); // Obtém o mês atual (0-11)
         const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate(); // Obtém o número de dias no mês atual
-        let salesData = Array.from({ length: daysInMonth }, () => ({ target: 0, sales: 0 }));
+        let salesData = [];
 
         function loadTargets() {
             database.ref('salesData').once('value').then((snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     salesData = data;
+                    if (salesData.length < daysInMonth) {
+                        salesData = [...salesData, ...Array.from({ length: daysInMonth - salesData.length }, () => ({ target: 0, sales: 0 }))];
+                    }
+                } else {
+                    salesData = Array.from({ length: daysInMonth }, () => ({ target: 0, sales: 0 }));
                 }
                 renderTargetsForm();
             });
@@ -104,10 +109,12 @@
         }
 
         function resetSales() {
-            salesData.forEach(day => day.sales = 0);
-            database.ref('salesData').set(salesData).then(() => {
-                alert('Vendas zeradas com sucesso!');
-            });
+            if (confirm('Tem certeza que deseja zerar as vendas? Esta ação não pode ser desfeita.')) {
+                salesData.forEach(day => day.sales = 0);
+                database.ref('salesData').set(salesData).then(() => {
+                    alert('Vendas zeradas com sucesso!');
+                });
+            }
         }
 
         window.onload = loadTargets;
