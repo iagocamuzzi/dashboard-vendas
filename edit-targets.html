@@ -62,7 +62,9 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        const daysInMonth = new Date(2024, new Date().getMonth() + 1, 0).getDate(); // Obtém o número de dias no mês atual
+        const currentYear = new Date().getFullYear();
+        const currentMonth = new Date().getMonth(); // Obtém o mês atual (0-11)
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate(); // Obtém o número de dias no mês atual
         let salesData = Array.from({ length: daysInMonth }, () => ({ target: 0, sales: 0 }));
 
         function loadTargets() {
