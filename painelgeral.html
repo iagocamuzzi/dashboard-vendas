@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Geral - Relatórios de Vendas</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .chart-container {
+            margin-top: 20px;
+        }
+        .summary {
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        .summary .card {
+            flex: 1;
+            margin: 10px;
+            padding: 20px;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .summary .card h5 {
+            margin-bottom: 15px;
+        }
+        .summary .card p {
+            font-size: 1.2em;
+            margin: 0;
+        }
+        .highlight {
+            background-color: #ffff99 !important;
+        }
+        .chart-title {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Painel Geral - Relatórios de Vendas</h1>
+        <div class="summary">
+            <div class="card">
+                <h5>Total de Vendas no Ano</h5>
+                <p id="totalAnnualSales">R$ 0,00</p>
+            </div>
+            <div class="card">
+                <h5>Melhor Dia de Vendas</h5>
+                <p id="bestSalesDay">N/D</p>
+            </div>
+            <div class="card">
+                <h5>Mês com Mais Vendas</h5>
+                <p id="bestSalesMonth">N/D</p>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h2 class="chart-title">Vendas Mensais</h2>
+            <canvas id="monthlySalesChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <h2 class="chart-title">Distribuição das Vendas por Dia da Semana</h2>
+            <canvas id="weeklySalesChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBgUn5EBlVhbhYhyWjyrzfOAjadf9v6Pms",
+            authDomain: "dashboardcs-b46d8.firebaseapp.com",
+            projectId: "dashboardcs-b46d8",
+            storageBucket: "dashboardcs-b46d8.appspot.com",
+            messagingSenderId: "214815582221",
+            appId: "1:214815582221:web:842f78088a3e5b901c8d44",
+            databaseURL: "https://dashboardcs-b46d8-default-rtdb.firebaseio.com/"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let monthlySales = [];
+        let weeklySales = [];
+        let totalAnnualSales = 0;
+        let bestSalesDay = "";
+        let bestSalesMonth = "";
+
+        function loadReportData() {
+            database.ref('salesData').once('value').then((snapshot) => {
+                const data = snapshot.val();
+                processSalesData(data);
+                renderMonthlySalesChart();
+                renderWeeklySalesChart();
+                updateSummary();
+            });
+        }
+
+        function processSalesData(data) {
+            const months = Array(12).fill(0);
+            const daysOfWeek = Array(7).fill(0);
+            let dailySales = [];
+
+            data.forEach((monthData, monthIndex) => {
+                monthData.forEach((dayData, dayIndex) => {
+                    const sales = dayData.sales;
+                    months[monthIndex] += sales;
+                    const date = new Date(2024, monthIndex, dayIndex + 1);
+                    daysOfWeek[date.getDay()] += sales;
+                    totalAnnualSales += sales;
+                    dailySales.push({ day: date, sales });
+                });
+            });
+
+            monthlySales = months;
+            weeklySales = daysOfWeek;
+
+            dailySales.sort((a, b) => b.sales - a.sales);
+            bestSalesDay = dailySales.length > 0 ? dailySales[0].day.toLocaleDateString('pt-BR') : "N/D";
+
+            bestSalesMonth = months.indexOf(Math.max(...months)) + 1;
+            bestSalesMonth = bestSalesMonth > 0 ? new Date(2024, bestSalesMonth - 1, 1).toLocaleString('pt-BR', { month: 'long' }) : "N/D";
+        }
+
+        function renderMonthlySalesChart() {
+            const ctx = document.getElementById('monthlySalesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'],
+                    datasets: [{
+                        label: 'Vendas Mensais (R$)',
+                        data: monthlySales,
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderWeeklySalesChart() {
+            const ctx = document.getElementById('weeklySalesChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'],
+                    datasets: [{
+                        label: 'Vendas por Dia da Semana (R$)',
+                        data: weeklySales,
+                        backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)', 'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)', 'rgba(201, 203, 207, 0.6)'],
+                        borderColor: 'rgba(255, 255, 255, 1)',
+                        borderWidth: 1
+                    }]
+                }
+            });
+        }
+
+        function updateSummary() {
+            document.getElementById('totalAnnualSales').innerText = totalAnnualSales.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('bestSalesDay').innerText = bestSalesDay;
+            document.getElementById('bestSalesMonth').innerText = bestSalesMonth;
+        }
+
+        window.onload = loadReportData;
+    </script>
+</body>
+</html>
